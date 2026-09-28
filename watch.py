@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Watch used-guitar shops for new Martin and Gibson listings and push a phone
+"""Watch used-guitar shops for new acoustic Martin and Gibson listings and push a phone
 notification through ntfy.sh. Standard library only.
 
     python3 watch.py                check once, notify new listings, update state.json
@@ -33,7 +33,7 @@ MAX_PUSHES = 10  # more new listings than this in one run gets a single summary 
 
 GV_API = "https://www.guitare-village.com/website/wp-json/wc/store/v1/products"
 VM_BASE = "https://www.vinstagemusic.fr"
-VM_LIST = VM_BASE + "/instruments-accessoires-occasion/guitares-et-basses"
+VM_LIST = VM_BASE + "/instruments-accessoires-occasion/guitares-et-basses/guitares-acoustiques"
 HM_LIST = "https://hurricanemusic.fr/s/330/guitare-occasion-nantes"
 MAX_PAGES = 3
 
@@ -74,14 +74,16 @@ def clean(text):
 
 
 def guitare_village(known):
-    """WooCommerce Store API: one search per brand across every used ("occasion") category."""
+    """WooCommerce Store API: one search per brand in the used acoustic guitars category."""
     listings = {}
     for brand in BRANDS:
         query = urllib.parse.urlencode({
-            "category": "occasion", "search": brand, "per_page": 100,
-            "orderby": "date", "order": "desc", "_fields": "id,name,permalink,prices",
+            "category": "acoustiques", "search": brand, "per_page": 100,
+            "orderby": "date", "order": "desc", "_fields": "id,name,permalink,prices,categories",
         })
         for product in json.loads(fetch(f"{GV_API}?{query}")):
+            if any("basses" in category["slug"] for category in product["categories"]):
+                continue  # acoustic basses are filed here too
             prices = product["prices"]
             amount = int(prices["price"]) / 10 ** prices["currency_minor_unit"]
             listings[str(product["id"])] = Listing(
@@ -166,10 +168,12 @@ def parse_hurricane(page):
     return items
 
 
-def in_nantes(listing):
-    """The page only lists the Nantes shop; the product page confirms it in case that filter ever changes."""
-    page = clean(fetch(listing.url).decode("utf-8", "latin1_fallback"))
-    return bool(re.search(r"Disponible Hurricane Music Nantes\s*:\s*Oui", page))
+def nantes_acoustic(listing):
+    """The used list mixes acoustic and electric, and the Bordeaux shop exists: the product page tells both."""
+    page = fetch(listing.url).decode("utf-8", "latin1_fallback")
+    breadcrumb = re.search(r'"BreadcrumbList".*?</script>', page, re.S)
+    return bool(re.search(r"Disponible Hurricane Music Nantes\s*:\s*Oui", clean(page))
+                and breadcrumb and "guitare-acoustique" in breadcrumb.group(0))
 
 
 @dataclass
@@ -184,10 +188,10 @@ class Source:
 
 SOURCES = [
     Source("guitare-village", "Guitare Village",
-           "https://www.guitare-village.com/website/index.php/categorie-produit/occasion/",
+           "https://www.guitare-village.com/website/index.php/categorie-produit/occasion/acoustiques/",
            guitare_village, image=guitare_village_image),
     Source("vinstage", "Vinstage Music", VM_LIST, vinstage),
-    Source("hurricane", "Hurricane Music (Nantes)", HM_LIST, hurricane, keep=in_nantes),
+    Source("hurricane", "Hurricane Music (Nantes)", HM_LIST, hurricane, keep=nantes_acoustic),
 ]
 
 

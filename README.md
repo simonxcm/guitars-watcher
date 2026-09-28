@@ -1,9 +1,10 @@
 # Guitar watch
 
-Sends a phone notification when a new used **Martin** or **Gibson** is listed at
-[Guitare Village](https://www.guitare-village.com/website/index.php/categorie-produit/occasion/),
-[Vinstage Music](https://www.vinstagemusic.fr/instruments-accessoires-occasion/guitares-et-basses) or
+Sends a phone notification when a new used **acoustic Martin** or **acoustic Gibson** is listed at
+[Guitare Village](https://www.guitare-village.com/website/index.php/categorie-produit/occasion/acoustiques/),
+[Vinstage Music](https://www.vinstagemusic.fr/instruments-accessoires-occasion/guitares-et-basses/guitares-acoustiques) or
 [Hurricane Music](https://hurricanemusic.fr/s/330/guitare-occasion-nantes) (Nantes shop only).
+Electric guitars and basses are ignored.
 Each alert shows the title, the price and a photo, and opens the listing when tapped.
 
 Everything is free: a Python script with no dependencies, run every 5 minutes by GitHub Actions,
@@ -13,9 +14,9 @@ with notifications through [ntfy.sh](https://ntfy.sh) (no account needed).
 
 | Shop | Source | Brand filter |
 |---|---|---|
-| Guitare Village | WooCommerce's public JSON API, one search per brand across every used category (acoustic, electric, jazz, vintage, bass…) | Title starts with the brand, so "Carl Martin" pedals are ignored |
-| Vinstage Music | The used guitars & basses page, newest first. Page 2–3 are read only if page 1 is entirely new | The shop's own brand label on each listing |
-| Hurricane Music (Nantes) | The Nantes used guitars page sorted newest first, read the same way | The shop's own brand label. Before alerting, the listing must say "Disponible Hurricane Music Nantes : Oui", so Bordeaux stock is never sent |
+| Guitare Village | WooCommerce's public JSON API, one search per brand in the used "Acoustiques" category (acoustic basses skipped) | Title starts with the brand |
+| Vinstage Music | The used acoustic guitars page, newest first. Page 2–3 are read only if page 1 is entirely new | The shop's own brand label on each listing |
+| Hurricane Music (Nantes) | The Nantes used guitars page sorted newest first, read the same way. It mixes acoustic and electric | The shop's own brand label. Before alerting, the product page must be filed under "Guitare Acoustique" and say "Disponible Hurricane Music Nantes : Oui", so electrics and Bordeaux stock are never sent |
 
 `state.json` stores the IDs already seen. A listing is notified once, the first time it appears.
 The very first run for a shop only records what is already listed.
