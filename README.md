@@ -5,7 +5,7 @@ Sends a phone notification when a new used **acoustic (folk) Martin or Gibson** 
 archtop and bass guitars are ignored, and so is sold stock.
 Each alert shows the title, the price and a photo, and opens the listing when tapped.
 
-Everything is free: a Python script with no dependencies, run every 5 minutes on GitHub Actions,
+Everything is free: a Python script with no dependencies, run every 10 minutes on GitHub Actions,
 started by a [cron-job.org](https://cron-job.org) timer, with notifications through
 [ntfy.sh](https://ntfy.sh) (no account needed).
 
@@ -48,12 +48,12 @@ The very first run for a shop only records what is already listed.
 4. In the repository, go to **Settings → Secrets and variables → Actions → New repository secret**.
    Name it `NTFY_TOPIC` and set your topic as the value.
 5. Go to **Actions → Watch guitars → Run workflow** to start a first run by hand. It should turn green.
-6. **Start it every 5 minutes.** GitHub's own schedule (in the workflow file) proved too unreliable:
+6. **Start it every 10 minutes.** GitHub's own schedule (in the workflow file) proved too unreliable:
    a new repository waited hours without a single scheduled run. It stays in place as a backup,
    and a free external timer starts the workflow instead:
    - Create a token at <https://github.com/settings/personal-access-tokens/new>: access to this
      repository only, permission **Actions: Read and write**, longest expiration offered.
-   - At [cron-job.org](https://console.cron-job.org), create a job running every 5 minutes:
+   - At [cron-job.org](https://console.cron-job.org), create a job running every 10 minutes (5 is the fastest useful):
      - URL: `https://api.github.com/repos/<you>/<repo>/actions/workflows/watch.yml/dispatches`
      - Method `POST`, body `{"ref":"main"}`
      - Headers: `Accept: application/vnd.github+json`, `Authorization: Bearer <token>`,
