@@ -2,7 +2,8 @@ name: Watch guitars
 
 on:
   schedule:
-    - cron: "*/5 * * * *"  # GitHub's minimum; runs can start a few minutes late at busy times
+    # Every 5 minutes (GitHub's minimum), off the top of the hour when GitHub delays or drops scheduled runs
+    - cron: "2-59/5 * * * *"
   workflow_dispatch:
 
 permissions:
