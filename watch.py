@@ -23,7 +23,8 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-BRANDS = ("martin", "gibson")  # default for every shop, a shop can narrow it in SOURCES
+BRANDS = ("martin", "gibson")
+BRAND_LABEL = "/".join(brand.title() for brand in BRANDS)
 NTFY_SERVER = os.environ.get("NTFY_SERVER", "https://ntfy.sh")
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")
 STATE_FILE = Path(__file__).with_name("state.json")
@@ -36,11 +37,8 @@ VM_LIST = VM_BASE + "/instruments-accessoires-occasion/guitares-et-basses"
 HM_LIST = "https://hurricanemusic.fr/s/330/guitare-occasion-nantes"
 MAX_PAGES = 3
 
-
-def brand_pattern(brands):
-    """Brand first, optionally after a year or "C.F.": matches "1963 Gibson ES-175", not "Carl Martin" pedals."""
-    return re.compile(r"^(?:(?:19|20)\d\d\s+)?(?:c\.?\s*f\.?\s+)?(?:" + "|".join(brands) + r")\b", re.I)
-
+# Brand first, optionally after a year or "C.F.": matches "1963 Gibson ES-175", not "Carl Martin" pedals.
+BRAND_RE = re.compile(r"^(?:(?:19|20)\d\d\s+)?(?:c\.?\s*f\.?\s+)?(?:" + "|".join(BRANDS) + r")\b", re.I)
 
 # Vinstage declares UTF-8 but some bytes are Latin-1.
 codecs.register_error("latin1_fallback", lambda e: (e.object[e.start:e.end].decode("latin-1"), e.end))
@@ -55,8 +53,8 @@ class Listing:
     brand: str = ""
     image: str = ""
 
-    def wanted(self, pattern):
-        return bool(pattern.match(self.brand or self.title))
+    def wanted(self):
+        return bool(BRAND_RE.match(self.brand or self.title))
 
 
 def fetch(url, data=None, headers=None, attempts=3):
@@ -92,7 +90,7 @@ def guitare_village(known):
                 price=f"{amount:,.0f} €".replace(",", " "),
                 url=product["permalink"],
             )
-    if not any(listing.wanted(brand_pattern(BRANDS)) for listing in listings.values()):
+    if not any(listing.wanted() for listing in listings.values()):
         raise RuntimeError("no Martin or Gibson found at all, has the API changed?")
     return list(listings.values())
 
@@ -168,6 +166,12 @@ def parse_hurricane(page):
     return items
 
 
+def in_nantes(listing):
+    """The page only lists the Nantes shop; the product page confirms it in case that filter ever changes."""
+    page = clean(fetch(listing.url).decode("utf-8", "latin1_fallback"))
+    return bool(re.search(r"Disponible Hurricane Music Nantes\s*:\s*Oui", page))
+
+
 @dataclass
 class Source:
     key: str  # name in state.json
@@ -175,7 +179,7 @@ class Source:
     url: str  # listing page, opened from a summary push
     listings: object  # function(known IDs) -> [Listing]
     image: object = None  # function(Listing) -> photo URL, for shops whose list has none
-    brands: tuple = BRANDS
+    keep: object = None  # function(Listing) -> bool, last check on a new Martin/Gibson before notifying
 
 
 SOURCES = [
@@ -183,7 +187,7 @@ SOURCES = [
            "https://www.guitare-village.com/website/index.php/categorie-produit/occasion/",
            guitare_village, image=guitare_village_image),
     Source("vinstage", "Vinstage Music", VM_LIST, vinstage),
-    Source("hurricane", "Hurricane Music (Nantes)", HM_LIST, hurricane, brands=("martin",)),
+    Source("hurricane", "Hurricane Music (Nantes)", HM_LIST, hurricane, keep=in_nantes),
 ]
 
 
@@ -195,14 +199,10 @@ def push(payload, dry_run):
     fetch(NTFY_SERVER, data=body, headers={"Content-Type": "application/json"})
 
 
-def brand_label(brands):
-    return "/".join(brand.title() for brand in brands)
-
-
 def notify(source, listings, dry_run):
     shop = source.shop
     if len(listings) > MAX_PUSHES:
-        push({"title": f"{len(listings)} new {brand_label(source.brands)} listings at {shop}",
+        push({"title": f"{len(listings)} new {BRAND_LABEL} listings at {shop}",
               "message": "\n".join(f"{l.title} · {l.price}" for l in listings[:20]),
               "click": source.url, "tags": ["guitar"], "priority": 4}, dry_run)
         return
@@ -252,19 +252,17 @@ def main():
         seen = state["sources"].get(source.key)
         try:
             listings = source.listings(set(seen or ()))
+            new = [l for l in listings if l.id not in (seen or {})]
+            wanted = [l for l in new if seen is not None and l.wanted() and (not source.keep or source.keep(l))]
         except Exception as error:
             print(f"{source.key}: FAILED: {error}")
             failed = True
             continue
-        pattern = brand_pattern(source.brands)
-        new = [l for l in listings if l.id not in (seen or {})]
-        wanted = [l for l in new if l.wanted(pattern)]
         if seen is None:
             print(f"{source.key}: first run, recorded {len(listings)} listings without notifying")
             seen = {}
         else:
-            print(f"{source.key}: {len(listings)} listings checked, {len(new)} new, "
-                  f"{len(wanted)} {brand_label(source.brands)}")
+            print(f"{source.key}: {len(listings)} listings checked, {len(new)} new, {len(wanted)} {BRAND_LABEL}")
             for l in wanted:
                 print(f"  NEW {l.title} · {l.price} · {l.url}")
             if wanted:
