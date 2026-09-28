@@ -1,0 +1,37 @@
+name: Watch guitars
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"  # GitHub's minimum; runs can start a few minutes late at busy times
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: watch
+  cancel-in-progress: false
+
+jobs:
+  watch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Check shops
+        run: python3 watch.py
+        env:
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
+
+      # Runs even when one shop failed, so listings already notified are not sent twice.
+      - name: Save seen listings
+        if: ${{ !cancelled() }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add state.json
+          git diff --cached --quiet && exit 0
+          git commit -m "Update seen listings"
+          git pull --rebase
+          git push
