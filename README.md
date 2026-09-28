@@ -5,8 +5,9 @@ Sends a phone notification when a new used **acoustic (folk) Martin or Gibson** 
 archtop and bass guitars are ignored, and so is sold stock.
 Each alert shows the title, the price and a photo, and opens the listing when tapped.
 
-Everything is free: a Python script with no dependencies, run every 5 minutes by GitHub Actions,
-with notifications through [ntfy.sh](https://ntfy.sh) (no account needed).
+Everything is free: a Python script with no dependencies, run every 5 minutes on GitHub Actions,
+started by a [cron-job.org](https://cron-job.org) timer, with notifications through
+[ntfy.sh](https://ntfy.sh) (no account needed).
 
 ## Shops and how each is read
 
@@ -47,11 +48,21 @@ The very first run for a shop only records what is already listed.
 4. In the repository, go to **Settings → Secrets and variables → Actions → New repository secret**.
    Name it `NTFY_TOPIC` and set your topic as the value.
 5. Go to **Actions → Watch guitars → Run workflow** to start a first run by hand. It should turn green.
-   After that it runs every 5 minutes.
+6. **Start it every 5 minutes.** GitHub's own schedule (in the workflow file) proved too unreliable:
+   a new repository waited hours without a single scheduled run. It stays in place as a backup,
+   and a free external timer starts the workflow instead:
+   - Create a token at <https://github.com/settings/personal-access-tokens/new>: access to this
+     repository only, permission **Actions: Read and write**, longest expiration offered.
+   - At [cron-job.org](https://console.cron-job.org), create a job running every 5 minutes:
+     - URL: `https://api.github.com/repos/<you>/<repo>/actions/workflows/watch.yml/dispatches`
+     - Method `POST`, body `{"ref":"main"}`
+     - Headers: `Accept: application/vnd.github+json`, `Authorization: Bearer <token>`,
+       `X-GitHub-Api-Version: 2022-11-28`, `Content-Type: application/json`
+   - **Test run** must answer `204 No Content`, and a run appears in the Actions tab.
 
 **Public or private repository?** On a public repository, GitHub Actions is free with no limit.
 A private one gets 2,000 free minutes a month, and each run counts as a full minute.
-If you make it private, change the cron in `.github/workflows/watch.yml` to `*/30 * * * *`.
+If you make it private, set the timer to every 30 minutes.
 
 ## Everyday use
 
@@ -60,5 +71,8 @@ If you make it private, change the cron in `.github/workflows/watch.yml` to `*/3
 - **Change the brands**: edit `BRANDS` at the top of `watch.py`, e.g. `("martin", "gibson", "guild")`.
 - **If a shop changes its website**: the run fails and GitHub emails you. The other shops are still checked.
 - **Flood guard**: if more than 10 new listings appear at once, you get a single summary push instead.
+- **Renew the timer's token** before it expires (the current one ends on 2027-09-27): create a new one
+  the same way and paste it in the cron-job.org job. GitHub retires API version `2022-11-28` in
+  March 2028, so update that header to the current version at the same time.
 - **Keep-alive**: `state.json` records the date of the last check. That makes one commit a day,
-  which stops GitHub from pausing the schedule after 60 days without activity.
+  which stops GitHub from pausing the backup schedule after 60 days without activity.
