@@ -1,22 +1,30 @@
 # Guitar watch
 
-Sends a phone notification when a new used **acoustic Martin** or **acoustic Gibson** is listed at
-[Guitare Village](https://www.guitare-village.com/website/index.php/categorie-produit/occasion/acoustiques/),
-[Vinstage Music](https://www.vinstagemusic.fr/instruments-accessoires-occasion/guitares-et-basses/guitares-acoustiques) or
-[Hurricane Music](https://hurricanemusic.fr/s/330/guitare-occasion-nantes) (Nantes shop only).
-Electric guitars and basses are ignored.
+Sends a phone notification when a new used **acoustic (folk) Martin or Gibson** is listed at one of
+9 shops that sell guitars from private sellers (consignment or buy-back). Electric, classical,
+archtop and bass guitars are ignored, and so is sold stock.
 Each alert shows the title, the price and a photo, and opens the listing when tapped.
 
 Everything is free: a Python script with no dependencies, run every 5 minutes by GitHub Actions,
 with notifications through [ntfy.sh](https://ntfy.sh) (no account needed).
 
-## How it checks each shop
+## Shops and how each is read
 
-| Shop | Source | Brand filter |
+| Shop | What is read | How it stays folk / used / local |
 |---|---|---|
-| Guitare Village | WooCommerce's public JSON API, one search per brand in the used "Acoustiques" category (acoustic basses skipped) | Title starts with the brand |
-| Vinstage Music | The used acoustic guitars page, newest first. Page 2–3 are read only if page 1 is entirely new | The shop's own brand label on each listing |
-| Hurricane Music (Nantes) | The Nantes used guitars page sorted newest first, read the same way. It mixes acoustic and electric | The shop's own brand label. Before alerting, the product page must be filed under "Guitare Acoustique" and say "Disponible Hurricane Music Nantes : Oui", so electrics and Bordeaux stock are never sent |
+| [Guitare Village](https://www.guitare-village.com/website/index.php/categorie-produit/occasion/acoustiques/) | WooCommerce JSON API, one search per brand in the used "Acoustiques" category | Acoustic basses skipped |
+| [Vinstage Music](https://www.vinstagemusic.fr/instruments-accessoires-occasion/guitares-et-basses/guitares-acoustiques) | Used acoustic page, newest first | Brand from the shop's own label |
+| [Hurricane Music](https://hurricanemusic.fr/s/330/guitare-occasion-nantes), Nantes | Nantes used guitars page, newest first | Product page must be filed under "Guitare Acoustique" and say "Disponible Hurricane Music Nantes : Oui" |
+| [Galerie Casanova](https://www.galerie-casanova.com/produits/guitares-acoustiques-vintages/), Paris 1er | WooCommerce JSON API, "flat-top" category | Classical and archtop guitars are in other categories |
+| [Bass N Guitar](https://bassnguitar.fr/categorie/guitares-acoustiques/), Paris 19e | WooCommerce JSON API, acoustic category | Paris stock only, not the Avignon shop |
+| [Le Guitarium](https://leguitarium.fr/categorie-produit/guitares-acoustiques/), Paris 9e | WooCommerce JSON API, "folk" category | |
+| [Italie Musique](https://italie-musique.com/collections/guitare-acoustique-occasion-paris), Paris 13e | Shopify JSON of the used acoustic collection | |
+| [Centrale Guitars "Seconde Vie"](https://centraleguitars.com/797-seconde-vie), Paris 9e | Used section as JSON, newest first | Electrics and basses skipped using the type in the product URL |
+| [California Music](https://www.californiamusic.fr/guitares-acoustiques/5--1-fr), Essonne | Acoustic page, every page (sorted by price) | Only guitars with the "okaz" (used) badge |
+
+For every shop, the title must start with Martin or Gibson (so "Carl Martin" pedals don't count),
+and titles naming a classical, nylon, archtop or bass model (Chet Atkins CEC, L-5, Super 400…) are skipped.
+On newest-first lists, page 2–3 are read only if page 1 is entirely new.
 
 `state.json` stores the IDs already seen. A listing is notified once, the first time it appears.
 The very first run for a shop only records what is already listed.

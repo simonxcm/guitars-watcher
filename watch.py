@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Watch used-guitar shops for new acoustic Martin and Gibson listings and push a phone
+"""Watch used-guitar shops for new acoustic (folk) Martin and Gibson listings and push a phone
 notification through ntfy.sh. Standard library only.
 
     python3 watch.py                check once, notify new listings, update state.json
@@ -30,17 +30,30 @@ NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")
 STATE_FILE = Path(__file__).with_name("state.json")
 USER_AGENT = "Mozilla/5.0 (compatible; guitar-watch/1.0; personal stock alert)"
 MAX_PUSHES = 10  # more new listings than this in one run gets a single summary push
+MAX_PAGES = 3
 
-GV_API = "https://www.guitare-village.com/website/wp-json/wc/store/v1/products"
+GV_SITE = "https://www.guitare-village.com/website"
 VM_BASE = "https://www.vinstagemusic.fr"
 VM_LIST = VM_BASE + "/instruments-accessoires-occasion/guitares-et-basses/guitares-acoustiques"
 HM_LIST = "https://hurricanemusic.fr/s/330/guitare-occasion-nantes"
-MAX_PAGES = 3
+CASANOVA = "https://www.galerie-casanova.com"
+BASS_N_GUITAR = "https://bassnguitar.fr"
+GUITARIUM = "https://leguitarium.fr"
+IM_COLLECTION = "https://italie-musique.com/collections/guitare-acoustique-occasion-paris"
+CG_LIST = "https://centraleguitars.com/797-seconde-vie"
+CM_BASE = "https://www.californiamusic.fr"
 
-# Brand first, optionally after a year or "C.F.": matches "1963 Gibson ES-175", not "Carl Martin" pedals.
-BRAND_RE = re.compile(r"^(?:(?:19|20)\d\d\s+)?(?:c\.?\s*f\.?\s+)?(?:" + "|".join(BRANDS) + r")\b", re.I)
+# Brand first, optionally after "Guitare", a year or "C.F.": matches "1963 Gibson ES-175" and
+# "Guitare Martin D-28", not "Carl Martin" pedals.
+BRAND_RE = re.compile(r"^(?:guitare\s+)?(?:(?:19|20)\d\d\s+)?(?:c\.?\s*f\.?\s+)?(?:" + "|".join(BRANDS) + r")\b", re.I)
 
-# Vinstage declares UTF-8 but some bytes are Latin-1.
+# Folk guitars only: some shops file nylon-string, archtop and bass models under "acoustic".
+NOT_FOLK_RE = re.compile(
+    r"classi|nylon|\bcec\b|chet atkins ce\b|\bn-(?:10|20)\b|\bc-\d\b"
+    r"|archtop|\bl-(?:4|5|7|10|12|30|48|50|75)(?!\d)|super ?[34]00|\bbass",
+    re.I)
+
+# Vinstage and California Music declare UTF-8 or nothing but send some Latin-1 bytes.
 codecs.register_error("latin1_fallback", lambda e: (e.object[e.start:e.end].decode("latin-1"), e.end))
 
 
@@ -52,9 +65,11 @@ class Listing:
     url: str
     brand: str = ""
     image: str = ""
+    available: bool = True
 
     def wanted(self):
-        return bool(BRAND_RE.match(self.brand or self.title))
+        return (self.available and bool(BRAND_RE.match(self.brand or self.title))
+                and not NOT_FOLK_RE.search(self.title))
 
 
 def fetch(url, data=None, headers=None, attempts=3):
@@ -73,42 +88,19 @@ def clean(text):
     return " ".join(html.unescape(re.sub(r"<[^>]+>", " ", text)).split())
 
 
-def guitare_village(known):
-    """WooCommerce Store API: one search per brand in the used acoustic guitars category."""
-    listings = {}
-    for brand in BRANDS:
-        query = urllib.parse.urlencode({
-            "category": "acoustiques", "search": brand, "per_page": 100,
-            "orderby": "date", "order": "desc", "_fields": "id,name,permalink,prices,categories",
-        })
-        for product in json.loads(fetch(f"{GV_API}?{query}")):
-            if any("basses" in category["slug"] for category in product["categories"]):
-                continue  # acoustic basses are filed here too
-            prices = product["prices"]
-            amount = int(prices["price"]) / 10 ** prices["currency_minor_unit"]
-            listings[str(product["id"])] = Listing(
-                id=str(product["id"]),
-                title=clean(product["name"]),
-                price=f"{amount:,.0f} €".replace(",", " "),
-                url=product["permalink"],
-            )
-    if not any(listing.wanted() for listing in listings.values()):
-        raise RuntimeError("no Martin or Gibson found at all, has the API changed?")
-    return list(listings.values())
+def euros(amount):
+    return f"{amount:,.0f} €".replace(",", " ") if amount else ""
 
 
-def guitare_village_image(listing):
-    product = json.loads(fetch(f"{GV_API}/{listing.id}?_fields=images"))
-    return product["images"][0]["thumbnail"] if product["images"] else ""
+def read_pages(url_for_page, parse, known, headers=None):
+    """Read a paginated listing until a page is empty, repeats this run's IDs, or holds a known ID.
 
-
-def newest_first(url_for_page, parse, known):
-    """Read a newest-first listing page by page, until a page holds an ID already seen."""
+    On a newest-first list the known ID means everything below was already seen.
+    Pass an empty `known` to read every page of a list sorted some other way.
+    """
     listings = {}
     for page in range(1, MAX_PAGES + 1):
-        items = parse(fetch(url_for_page(page)).decode("utf-8", "latin1_fallback"))
-        if page == 1 and not items:
-            raise RuntimeError(f"no listing parsed on {url_for_page(1)}, has the page layout changed?")
+        items = parse(fetch(url_for_page(page), headers=headers).decode("utf-8", "latin1_fallback"))
         # Past the last page some shops serve page 1 again, hence the check on this run's IDs too.
         done = not items or any(item.id in known or item.id in listings for item in items)
         for item in items:
@@ -118,8 +110,64 @@ def newest_first(url_for_page, parse, known):
     return list(listings.values())
 
 
+# --- WooCommerce shops: public Store API, newest first --------------------------------------
+
+def woocommerce(site, keep=lambda product: True, **params):
+    query = urllib.parse.urlencode({
+        "orderby": "date", "order": "desc", "per_page": 100,
+        "_fields": "id,name,permalink,prices,categories,is_in_stock", **params,
+    })
+    listings = []
+    for product in json.loads(fetch(f"{site}/wp-json/wc/store/v1/products?{query}")):
+        if keep(product):
+            prices = product["prices"]
+            listings.append(Listing(
+                id=str(product["id"]),
+                title=clean(product["name"]),
+                price=euros(int(prices["price"] or 0) / 10 ** prices["currency_minor_unit"]),
+                url=product["permalink"],
+                available=product["is_in_stock"],
+            ))
+    return listings
+
+
+def woocommerce_image(site):
+    """The list is fetched without photos to stay small; this gets one for a new listing only."""
+    def image(listing):
+        product = json.loads(fetch(f"{site}/wp-json/wc/store/v1/products/{listing.id}?_fields=images"))
+        return product["images"][0]["thumbnail"] if product["images"] else ""
+    return image
+
+
+def guitare_village(known):
+    """One search per brand in the used acoustic category, which also holds acoustic basses."""
+    no_bass = lambda product: not any("basses" in category["slug"] for category in product["categories"])
+    listings = {}
+    for brand in BRANDS:
+        for listing in woocommerce(GV_SITE, no_bass, category="acoustiques", search=brand):
+            listings[listing.id] = listing
+    return list(listings.values())
+
+
+def casanova(known):
+    return woocommerce(CASANOVA, category="guitares-vintages-flat-top")
+
+
+def bass_n_guitar(known):
+    """The acoustic category mixes the Paris and Avignon shops."""
+    in_paris = lambda product: any(term["name"] == "Paris"
+                                   for attribute in product["attributes"] for term in attribute["terms"])
+    return woocommerce(BASS_N_GUITAR, in_paris, category=46, _fields="id,name,permalink,prices,is_in_stock,attributes")
+
+
+def guitarium(known):
+    return woocommerce(GUITARIUM, category="folk")
+
+
+# --- Other shops ----------------------------------------------------------------------------
+
 def vinstage(known):
-    return newest_first(lambda page: VM_LIST if page == 1 else f"{VM_LIST}/{page}", parse_vinstage, known)
+    return read_pages(lambda page: VM_LIST if page == 1 else f"{VM_LIST}/{page}", parse_vinstage, known)
 
 
 def parse_vinstage(page):
@@ -143,7 +191,7 @@ def parse_vinstage(page):
 
 
 def hurricane(known):
-    return newest_first(lambda page: f"{HM_LIST}?order=product.date_add.desc&page={page}", parse_hurricane, known)
+    return read_pages(lambda page: f"{HM_LIST}?order=product.date_add.desc&page={page}", parse_hurricane, known)
 
 
 def parse_hurricane(page):
@@ -160,7 +208,7 @@ def parse_hurricane(page):
         items.append(Listing(
             id=product_id.group(1),
             title=f"{brand} {clean(link.group(2))}".strip(),
-            price=f"{float(price.group(1)):,.0f} €".replace(",", " ") if price else "",
+            price=euros(float(price.group(1))) if price else "",
             url=link.group(1),
             brand=brand,
             image=image.group(1) if image else "",
@@ -176,6 +224,71 @@ def nantes_acoustic(listing):
                 and breadcrumb and "guitare-acoustique" in breadcrumb.group(0))
 
 
+def italie_musique(known):
+    """Shopify: the collection's public JSON, sold guitars included."""
+    products = json.loads(fetch(f"{IM_COLLECTION}/products.json?limit=250"))["products"]
+    return [Listing(
+        id=str(product["id"]),
+        title=clean(product["title"]),
+        price=euros(float(product["variants"][0]["price"])),
+        url=f"https://italie-musique.com/products/{product['handle']}",
+        image=product["images"][0]["src"] if product["images"] else "",
+        available=any(variant["available"] for variant in product["variants"]),
+    ) for product in products]
+
+
+def centrale(known):
+    """PrestaShop answers in JSON when asked like its own JavaScript does."""
+    return read_pages(lambda page: f"{CG_LIST}?order=product.date_add.desc&page={page}", parse_centrale, known,
+                      headers={"X-Requested-With": "XMLHttpRequest", "Accept": "application/json"})
+
+
+def parse_centrale(page):
+    items = []
+    for product in json.loads(page)["products"]:
+        brand = clean(product["manufacturer_name"] or "")
+        items.append(Listing(
+            id=str(product["id_product"]),
+            title=f"{brand} {clean(product['name'])}".strip(),
+            price=euros(product["price_amount"]),
+            url=product["url"],
+            brand=brand,
+            image=((product.get("cover") or {}).get("medium") or {}).get("url", ""),
+        ))
+    return items
+
+
+def centrale_acoustic(listing):
+    """The used section also holds electrics and basses; recent URLs name the type ("guitare-electrique-…")."""
+    path = urllib.parse.urlsplit(listing.url).path
+    return "/guitares-electriques/" not in path and not re.search(r"electrique|basse", path.rsplit("/", 1)[-1])
+
+
+def california(known):
+    """Sorted by price, not date, so every page is read."""
+    return read_pages(lambda page: f"{CM_BASE}/guitares-acoustiques/5--{page}-fr", parse_california, known=())
+
+
+def parse_california(page):
+    items = []
+    for block in page.split('<table class="listing_vert">')[1:]:
+        link = re.search(r'<h2><a href="([^"]*produit_(\d+)_fr\.html)" title="([^"]*)"', block)
+        if not link or 'class="okaz"' not in block or "classi" in link.group(1):
+            continue  # used guitars carry the "okaz" badge, new stock doesn't
+        price = re.search(r'<span class="prix">(.*?)</span>', block, re.S)
+        image = re.search(r'<img src="(images_produits/[^"]+)"', block)
+        title = clean(link.group(3))
+        items.append(Listing(
+            id=link.group(2),
+            title=re.sub(r"\s*-\s*EN STOCK$", "", title),
+            price=clean(price.group(1)) if price else "",
+            url=f"{CM_BASE}/{link.group(1)}",
+            image=f"{CM_BASE}/{image.group(1)}" if image else "",
+            available=title.endswith("EN STOCK"),
+        ))
+    return items
+
+
 @dataclass
 class Source:
     key: str  # name in state.json
@@ -187,11 +300,19 @@ class Source:
 
 
 SOURCES = [
-    Source("guitare-village", "Guitare Village",
-           "https://www.guitare-village.com/website/index.php/categorie-produit/occasion/acoustiques/",
-           guitare_village, image=guitare_village_image),
+    Source("guitare-village", "Guitare Village", f"{GV_SITE}/index.php/categorie-produit/occasion/acoustiques/",
+           guitare_village, image=woocommerce_image(GV_SITE)),
     Source("vinstage", "Vinstage Music", VM_LIST, vinstage),
     Source("hurricane", "Hurricane Music (Nantes)", HM_LIST, hurricane, keep=nantes_acoustic),
+    Source("galerie-casanova", "Galerie Casanova (Paris 1er)", f"{CASANOVA}/produits/guitares-acoustiques-vintages/",
+           casanova, image=woocommerce_image(CASANOVA)),
+    Source("bass-n-guitar", "Bass N Guitar (Paris 19e)", f"{BASS_N_GUITAR}/categorie/guitares-acoustiques/",
+           bass_n_guitar, image=woocommerce_image(BASS_N_GUITAR)),
+    Source("le-guitarium", "Le Guitarium (Paris 9e)", f"{GUITARIUM}/categorie-produit/guitares-acoustiques/",
+           guitarium, image=woocommerce_image(GUITARIUM)),
+    Source("italie-musique", "Italie Musique (Paris 13e)", IM_COLLECTION, italie_musique),
+    Source("centrale-guitars", "Centrale Guitars (Paris 9e)", CG_LIST, centrale, keep=centrale_acoustic),
+    Source("california-music", "California Music (Essonne)", f"{CM_BASE}/guitares-acoustiques/5--1-fr", california),
 ]
 
 
@@ -256,6 +377,8 @@ def main():
         seen = state["sources"].get(source.key)
         try:
             listings = source.listings(set(seen or ()))
+            if not listings:
+                raise RuntimeError("nothing listed at all, has the website changed?")
             new = [l for l in listings if l.id not in (seen or {})]
             wanted = [l for l in new if seen is not None and l.wanted() and (not source.keep or source.keep(l))]
         except Exception as error:
