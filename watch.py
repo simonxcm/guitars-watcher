@@ -23,7 +23,7 @@ from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
 
-BRANDS = ("martin", "gibson")
+BRANDS = ("martin", "gibson")  # default for every shop, a shop can narrow it in SOURCES
 NTFY_SERVER = os.environ.get("NTFY_SERVER", "https://ntfy.sh")
 NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "")
 STATE_FILE = Path(__file__).with_name("state.json")
@@ -33,10 +33,14 @@ MAX_PUSHES = 10  # more new listings than this in one run gets a single summary 
 GV_API = "https://www.guitare-village.com/website/wp-json/wc/store/v1/products"
 VM_BASE = "https://www.vinstagemusic.fr"
 VM_LIST = VM_BASE + "/instruments-accessoires-occasion/guitares-et-basses"
-VM_MAX_PAGES = 3
+HM_LIST = "https://hurricanemusic.fr/s/330/guitare-occasion-nantes"
+MAX_PAGES = 3
 
-# Brand first, optionally after a year or "C.F.": matches "1963 Gibson ES-175", not "Carl Martin" pedals.
-BRAND_RE = re.compile(r"^(?:(?:19|20)\d\d\s+)?(?:c\.?\s*f\.?\s+)?(?:" + "|".join(BRANDS) + r")\b", re.I)
+
+def brand_pattern(brands):
+    """Brand first, optionally after a year or "C.F.": matches "1963 Gibson ES-175", not "Carl Martin" pedals."""
+    return re.compile(r"^(?:(?:19|20)\d\d\s+)?(?:c\.?\s*f\.?\s+)?(?:" + "|".join(brands) + r")\b", re.I)
+
 
 # Vinstage declares UTF-8 but some bytes are Latin-1.
 codecs.register_error("latin1_fallback", lambda e: (e.object[e.start:e.end].decode("latin-1"), e.end))
@@ -51,8 +55,8 @@ class Listing:
     brand: str = ""
     image: str = ""
 
-    def wanted(self):
-        return bool(BRAND_RE.match(self.brand or self.title))
+    def wanted(self, pattern):
+        return bool(pattern.match(self.brand or self.title))
 
 
 def fetch(url, data=None, headers=None, attempts=3):
@@ -88,7 +92,7 @@ def guitare_village(known):
                 price=f"{amount:,.0f} €".replace(",", " "),
                 url=product["permalink"],
             )
-    if not any(listing.wanted() for listing in listings.values()):
+    if not any(listing.wanted(brand_pattern(BRANDS)) for listing in listings.values()):
         raise RuntimeError("no Martin or Gibson found at all, has the API changed?")
     return list(listings.values())
 
@@ -98,18 +102,24 @@ def guitare_village_image(listing):
     return product["images"][0]["thumbnail"] if product["images"] else ""
 
 
-def vinstage(known):
-    """Newest-first HTML listing, no brand filter in the URL: read pages until one holds a known ID."""
-    listings = []
-    for page in range(1, VM_MAX_PAGES + 1):
-        url = VM_LIST if page == 1 else f"{VM_LIST}/{page}"
-        items = parse_vinstage(fetch(url).decode("utf-8", "latin1_fallback"))
-        if not items:
-            raise RuntimeError(f"no listing parsed on {url}, has the page layout changed?")
-        listings += items
-        if any(item.id in known for item in items):
+def newest_first(url_for_page, parse, known):
+    """Read a newest-first listing page by page, until a page holds an ID already seen."""
+    listings = {}
+    for page in range(1, MAX_PAGES + 1):
+        items = parse(fetch(url_for_page(page)).decode("utf-8", "latin1_fallback"))
+        if page == 1 and not items:
+            raise RuntimeError(f"no listing parsed on {url_for_page(1)}, has the page layout changed?")
+        # Past the last page some shops serve page 1 again, hence the check on this run's IDs too.
+        done = not items or any(item.id in known or item.id in listings for item in items)
+        for item in items:
+            listings.setdefault(item.id, item)
+        if done:
             break
-    return listings
+    return list(listings.values())
+
+
+def vinstage(known):
+    return newest_first(lambda page: VM_LIST if page == 1 else f"{VM_LIST}/{page}", parse_vinstage, known)
 
 
 def parse_vinstage(page):
@@ -132,12 +142,48 @@ def parse_vinstage(page):
     return items
 
 
-# (state key, shop name, listing page for summaries, fetch function, image lookup for new listings)
+def hurricane(known):
+    return newest_first(lambda page: f"{HM_LIST}?order=product.date_add.desc&page={page}", parse_hurricane, known)
+
+
+def parse_hurricane(page):
+    items = []
+    for block in page.split('class="product-miniature js-product-miniature"')[1:]:
+        product_id = re.search(r'data-id-product="(\d+)"', block)
+        link = re.search(r'class="h3 product-title"><a href="([^"]+)"[^>]*>(.*?)</a>', block, re.S)
+        if not (product_id and link):
+            continue
+        brand = re.search(r'class="manufacturer-name[^"]*">(.*?)</h2>', block, re.S)
+        price = re.search(r'itemprop="price" content="([\d.]+)"', block)
+        image = re.search(r'<img[^>]+src="([^"]+)"', block)
+        brand = clean(brand.group(1)) if brand else ""
+        items.append(Listing(
+            id=product_id.group(1),
+            title=f"{brand} {clean(link.group(2))}".strip(),
+            price=f"{float(price.group(1)):,.0f} €".replace(",", " ") if price else "",
+            url=link.group(1),
+            brand=brand,
+            image=image.group(1) if image else "",
+        ))
+    return items
+
+
+@dataclass
+class Source:
+    key: str  # name in state.json
+    shop: str
+    url: str  # listing page, opened from a summary push
+    listings: object  # function(known IDs) -> [Listing]
+    image: object = None  # function(Listing) -> photo URL, for shops whose list has none
+    brands: tuple = BRANDS
+
+
 SOURCES = [
-    ("guitare-village", "Guitare Village",
-     "https://www.guitare-village.com/website/index.php/categorie-produit/occasion/",
-     guitare_village, guitare_village_image),
-    ("vinstage", "Vinstage Music", VM_LIST, vinstage, None),
+    Source("guitare-village", "Guitare Village",
+           "https://www.guitare-village.com/website/index.php/categorie-produit/occasion/",
+           guitare_village, image=guitare_village_image),
+    Source("vinstage", "Vinstage Music", VM_LIST, vinstage),
+    Source("hurricane", "Hurricane Music (Nantes)", HM_LIST, hurricane, brands=("martin",)),
 ]
 
 
@@ -149,16 +195,21 @@ def push(payload, dry_run):
     fetch(NTFY_SERVER, data=body, headers={"Content-Type": "application/json"})
 
 
-def notify(shop, shop_url, listings, find_image, dry_run):
+def brand_label(brands):
+    return "/".join(brand.title() for brand in brands)
+
+
+def notify(source, listings, dry_run):
+    shop = source.shop
     if len(listings) > MAX_PUSHES:
-        push({"title": f"{len(listings)} new Martin/Gibson listings at {shop}",
+        push({"title": f"{len(listings)} new {brand_label(source.brands)} listings at {shop}",
               "message": "\n".join(f"{l.title} · {l.price}" for l in listings[:20]),
-              "click": shop_url, "tags": ["guitar"], "priority": 4}, dry_run)
+              "click": source.url, "tags": ["guitar"], "priority": 4}, dry_run)
         return
     for listing in listings:
-        if find_image and not listing.image:
+        if source.image and not listing.image:
             try:
-                listing.image = find_image(listing)
+                listing.image = source.image(listing)
             except Exception as error:  # a missing photo should never block the alert
                 print(f"  no image for {listing.id}: {error}")
         payload = {"title": " · ".join(filter(None, [listing.title, listing.price])),
@@ -197,27 +248,29 @@ def main():
 
     state = load_state()
     failed = False
-    for key, shop, shop_url, fetch_listings, find_image in SOURCES:
-        seen = state["sources"].get(key)
+    for source in SOURCES:
+        seen = state["sources"].get(source.key)
         try:
-            listings = fetch_listings(set(seen or ()))
+            listings = source.listings(set(seen or ()))
         except Exception as error:
-            print(f"{key}: FAILED: {error}")
+            print(f"{source.key}: FAILED: {error}")
             failed = True
             continue
+        pattern = brand_pattern(source.brands)
         new = [l for l in listings if l.id not in (seen or {})]
-        wanted = [l for l in new if l.wanted()]
+        wanted = [l for l in new if l.wanted(pattern)]
         if seen is None:
-            print(f"{key}: first run, recorded {len(listings)} listings without notifying")
+            print(f"{source.key}: first run, recorded {len(listings)} listings without notifying")
             seen = {}
         else:
-            print(f"{key}: {len(listings)} listings checked, {len(new)} new, {len(wanted)} Martin/Gibson")
+            print(f"{source.key}: {len(listings)} listings checked, {len(new)} new, "
+                  f"{len(wanted)} {brand_label(source.brands)}")
             for l in wanted:
                 print(f"  NEW {l.title} · {l.price} · {l.url}")
             if wanted:
-                notify(shop, shop_url, wanted, find_image, args.dry_run)
+                notify(source, wanted, args.dry_run)
         seen.update({l.id: l.title for l in new})
-        state["sources"][key] = seen
+        state["sources"][source.key] = seen
 
     # A dated heartbeat commits at least once a day, so GitHub never pauses the schedule for inactivity.
     state["last_check"] = date.today().isoformat()

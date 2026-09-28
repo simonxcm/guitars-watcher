@@ -2,7 +2,8 @@
 
 Sends a phone notification when a new used **Martin** or **Gibson** is listed at
 [Guitare Village](https://www.guitare-village.com/website/index.php/categorie-produit/occasion/) or
-[Vinstage Music](https://www.vinstagemusic.fr/instruments-accessoires-occasion/guitares-et-basses).
+[Vinstage Music](https://www.vinstagemusic.fr/instruments-accessoires-occasion/guitares-et-basses),
+and a new used **Martin** at [Hurricane Music](https://hurricanemusic.fr/s/330/guitare-occasion-nantes) in Nantes.
 Each alert shows the title, the price and a photo, and opens the listing when tapped.
 
 Everything is free: a Python script with no dependencies, run every 5 minutes by GitHub Actions,
@@ -14,6 +15,7 @@ with notifications through [ntfy.sh](https://ntfy.sh) (no account needed).
 |---|---|---|
 | Guitare Village | WooCommerce's public JSON API, one search per brand across every used category (acoustic, electric, jazz, vintage, bass…) | Title starts with the brand, so "Carl Martin" pedals are ignored |
 | Vinstage Music | The used guitars & basses page, newest first. Page 2–3 are read only if page 1 is entirely new | The shop's own brand label on each listing |
+| Hurricane Music (Nantes) | The used guitars page sorted newest first, read the same way | The shop's own brand label, **Martin only** |
 
 `state.json` stores the IDs already seen. A listing is notified once, the first time it appears.
 The very first run for a shop only records what is already listed.
@@ -47,7 +49,8 @@ If you make it private, change the cron in `.github/workflows/watch.yml` to `*/3
 - **Run locally**: `NTFY_TOPIC=<your-topic> python3 watch.py`, or `python3 watch.py --dry-run`
   to see what would be sent without sending or saving anything.
 - **Change the brands**: edit `BRANDS` at the top of `watch.py`, e.g. `("martin", "gibson", "guild")`.
-- **If a shop changes its website**: the run fails and GitHub emails you. The other shop is still checked.
+  A shop can use its own list: Hurricane has `brands=("martin",)` in `SOURCES`.
+- **If a shop changes its website**: the run fails and GitHub emails you. The other shops are still checked.
 - **Flood guard**: if more than 10 new listings appear at once, you get a single summary push instead.
 - **Keep-alive**: `state.json` records the date of the last check. That makes one commit a day,
   which stops GitHub from pausing the schedule after 60 days without activity.
