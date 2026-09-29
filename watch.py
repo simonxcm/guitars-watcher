@@ -31,6 +31,7 @@ STATE_FILE = Path(__file__).with_name("state.json")
 USER_AGENT = "Mozilla/5.0 (compatible; guitar-watch/1.0; personal stock alert)"
 MAX_PUSHES = 10  # more new listings than this in one run gets a single summary push
 MAX_PAGES = 3
+FAIL_AFTER = 3  # a shop must fail this many runs in a row to fail the run, so one-off outages stay quiet
 
 GV_SITE = "https://www.guitare-village.com/website"
 VM_BASE = "https://www.vinstagemusic.fr"
@@ -372,7 +373,7 @@ def main():
         return
 
     state = load_state()
-    failed = False
+    failures = state.setdefault("failures", {})
     for source in SOURCES:
         seen = state["sources"].get(source.key)
         try:
@@ -382,9 +383,10 @@ def main():
             new = [l for l in listings if l.id not in (seen or {})]
             wanted = [l for l in new if seen is not None and l.wanted() and (not source.keep or source.keep(l))]
         except Exception as error:
-            print(f"{source.key}: FAILED: {error}")
-            failed = True
+            failures[source.key] = failures.get(source.key, 0) + 1
+            print(f"{source.key}: FAILED ({failures[source.key]} in a row): {error}")
             continue
+        failures.pop(source.key, None)
         if seen is None:
             print(f"{source.key}: first run, recorded {len(listings)} listings without notifying")
             seen = {}
@@ -401,7 +403,10 @@ def main():
     state["last_check"] = date.today().isoformat()
     if not args.dry_run:
         save_state(state)
-    sys.exit(1 if failed else 0)
+    broken = [key for key, count in failures.items() if count >= FAIL_AFTER]
+    if broken:
+        print(f"Failing the run: {', '.join(broken)} failed {FAIL_AFTER}+ runs in a row, the website may have changed.")
+    sys.exit(1 if broken else 0)
 
 
 if __name__ == "__main__":

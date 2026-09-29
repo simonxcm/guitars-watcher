@@ -69,7 +69,8 @@ If you make it private, set the timer to every 30 minutes.
 - **Run locally**: `NTFY_TOPIC=<your-topic> python3 watch.py`, or `python3 watch.py --dry-run`
   to see what would be sent without sending or saving anything.
 - **Change the brands**: edit `BRANDS` at the top of `watch.py`, e.g. `("martin", "gibson", "guild")`.
-- **If a shop changes its website**: the run fails and GitHub emails you. The other shops are still checked.
+- **If a shop changes its website**: once it has failed 3 runs in a row, the run fails and GitHub emails you.
+  A one-off outage is just retried on the next run. The other shops are always checked.
 - **Flood guard**: if more than 10 new listings appear at once, you get a single summary push instead.
 - **Renew the timer's token** before it expires (the current one ends on 2027-09-27): create a new one
   the same way and paste it in the cron-job.org job. GitHub retires API version `2022-11-28` in
