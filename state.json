@@ -276,8 +276,5 @@
   }
  },
  "last_check": "2026-09-30",
- "failures": {
-  "galerie-casanova": 1,
-  "bass-n-guitar": 1
- }
+ "failures": {}
 }
