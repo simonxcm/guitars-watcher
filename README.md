@@ -1,7 +1,7 @@
 # Guitar watch
 
 Sends a phone notification when a new used **acoustic (folk) Martin or Gibson** is listed at one of
-8 shops in Île-de-France and Nantes that sell guitars from private sellers (consignment or buy-back). Electric, classical,
+11 shops in Île-de-France and Nantes that sell guitars from private sellers (consignment or buy-back). Electric, classical,
 archtop and bass guitars are ignored, and so is sold stock.
 Each alert shows the title, the price and a photo, and opens the listing when tapped.
 
@@ -21,10 +21,13 @@ started by a [cron-job.org](https://cron-job.org) timer, with notifications thro
 | [Italie Musique](https://italie-musique.com/collections/guitare-acoustique-occasion-paris), Paris 13e | Shopify JSON of the used acoustic collection | |
 | [Centrale Guitars "Seconde Vie"](https://centraleguitars.com/797-seconde-vie), Paris 9e | Used section as JSON, newest first | Electrics and basses skipped using the type in the product URL |
 | [California Music](https://www.californiamusic.fr/guitares-acoustiques/5--1-fr), Essonne | Acoustic page, every page (sorted by price) | Only guitars with the "okaz" (used) badge |
+| [Woodstore](https://www.woodstore.fr/guitares), Paris 9e | RSS feed of the 20 newest guitars | Mostly vintage electrics: the description must say acoustic or folk |
+| [Guitare Collection](https://guitarecollection.com/boutique/guitares-acoustiques-vintage), Paris 9e | Acoustic page, available guitars first | Reserved and sold guitars skipped |
+| [Guitar Street](https://guitarstreet.fr/categorie-produit/guitares-occasions/), Paris 9e | WooCommerce JSON API, used category | Mixes acoustic and electric: the description must say acoustic or folk |
 
 For every shop, the title must start with Martin or Gibson (so "Carl Martin" pedals don't count),
 and titles naming a classical, nylon, archtop or bass model (Chet Atkins CEC, L-5, Super 400…),
-or a mandolin, ukulele or banjo, are skipped.
+or a mandolin, ukulele, banjo or tiple, are skipped.
 On newest-first lists, page 2–3 are read only if page 1 is entirely new.
 
 `state.json` stores the IDs already seen. A listing is notified once, the first time it appears.

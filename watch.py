@@ -41,16 +41,19 @@ GUITARIUM = "https://leguitarium.fr"
 IM_COLLECTION = "https://italie-musique.com/collections/guitare-acoustique-occasion-paris"
 CG_LIST = "https://centraleguitars.com/797-seconde-vie"
 CM_BASE = "https://www.californiamusic.fr"
+WOODSTORE = "https://www.woodstore.fr"
+GC_LIST = "https://guitarecollection.com/boutique/guitares-acoustiques-vintage"
+GUITAR_STREET = "https://guitarstreet.fr"
 
-# Brand first, optionally after "Guitare", a year or "C.F.": matches "1963 Gibson ES-175" and
+# Brand first, optionally after "Guitare"/"Occasion", a year or "C.F.": matches "1963 Gibson ES-175" and
 # "Guitare Martin D-28", not "Carl Martin" pedals.
-BRAND_RE = re.compile(r"^(?:guitare\s+)?(?:(?:19|20)\d\d\s+)?(?:c\.?\s*f\.?\s+)?(?:" + "|".join(BRANDS) + r")\b", re.I)
+BRAND_RE = re.compile(r"^(?:(?:guitare|occasion)\s+)?(?:(?:19|20)\d\d\s+)?(?:c\.?\s*f\.?\s+)?(?:" + "|".join(BRANDS) + r")\b", re.I)
 
 # Folk guitars only: some shops file nylon-string, archtop, bass and other fretted models under "acoustic".
 NOT_FOLK_RE = re.compile(
     r"classi|nylon|\bcec\b|chet atkins ce\b|\bn-(?:10|20)\b|\bc-\d\b"
     r"|archtop|\bl-(?:4|5|7|10|12|30|48|50|75)(?!\d)|super ?[34]00|\bbass"
-    r"|mandol|ukul|\buke\b|banjo",
+    r"|mandol|ukul|\buke\b|banjo|tiple",
     re.I)
 
 # California Music sends Latin-1 bytes in pages read as UTF-8.
@@ -66,6 +69,7 @@ class Listing:
     brand: str = ""
     image: str = ""
     available: bool = True
+    details: str = ""  # description, for shops that only say there whether a guitar is acoustic
 
     def wanted(self):
         return (self.available and bool(BRAND_RE.match(self.brand or self.title))
@@ -127,6 +131,7 @@ def woocommerce(site, keep=lambda product: True, **params):
                 price=euros(int(prices["price"] or 0) / 10 ** prices["currency_minor_unit"]),
                 url=product["permalink"],
                 available=product["is_in_stock"],
+                details=clean(f"{product.get('short_description') or ''} {product.get('description') or ''}"),
             ))
     return listings
 
@@ -162,6 +167,12 @@ def bass_n_guitar(known):
 
 def guitarium(known):
     return woocommerce(GUITARIUM, category="folk")
+
+
+def guitar_street(known):
+    """The used category mixes acoustic and electric; only the description tells them apart."""
+    return woocommerce(GUITAR_STREET, category="guitares-occasions",
+                       _fields="id,name,permalink,prices,is_in_stock,short_description,description")
 
 
 # --- Other shops ----------------------------------------------------------------------------
@@ -265,6 +276,61 @@ def parse_california(page):
     return items
 
 
+def acoustic_description(listing):
+    text = listing.details.lower()
+    return bool(re.search(r"acousti|folk", text)) and not re.search(
+        r"guitare\s+[ée]lectrique|electric guitar|solid ?body|demi-caisse|semi-hollow|hollow ?body", text)
+
+
+def woodstore(known):
+    """Squarespace: the RSS feed holds the 20 newest guitars, far lighter than the store's JSON."""
+    feed = fetch(f"{WOODSTORE}/guitares?format=rss").decode("utf-8", "latin1_fallback")
+    feed = feed.replace("<![CDATA[", "").replace("]]>", "")
+    items = []
+    for item in re.findall(r"<item>(.*?)</item>", feed, re.S):
+        link = re.search(r"<link>(.*?)</link>", item, re.S)
+        title = re.search(r"<title>(.*?)</title>", item, re.S)
+        if not (link and title):
+            continue
+        guid = re.search(r"<guid[^>]*>(.*?)</guid>", item, re.S)
+        description = re.search(r"<description>(.*?)</description>", item, re.S)
+        image = re.search(r'<media:content[^>]+url="([^"]+)"', item)
+        items.append(Listing(
+            id=clean((guid or link).group(1)),
+            title=clean(title.group(1)),
+            price="",
+            url=clean(link.group(1)),
+            image=image.group(1) if image else "",
+            details=clean(html.unescape(description.group(1))) if description else "",
+        ))
+    return items
+
+
+def guitare_collection(known):
+    """Available guitars come first, then reserved and sold ones."""
+    return read_pages(lambda page: f"{GC_LIST}?page={page}", parse_guitare_collection, known)
+
+
+def parse_guitare_collection(page):
+    items = []
+    for record in page.split('<article class="record">')[1:]:
+        link = re.search(r'href="(https://guitarecollection\.com/produit/[^"]+)"', record)
+        title = re.search(r"<h2>(.*?)</h2>", record, re.S)
+        if not (link and title):
+            continue
+        status = re.search(r"Disponibilit.*?<strong>(.*?)</strong>", record, re.S)
+        image = re.search(r'data-src="([^"]+)"', record)
+        items.append(Listing(
+            id=link.group(1).rsplit("/", 1)[-1],
+            title=clean(title.group(1)),
+            price="",
+            url=link.group(1),
+            image=image.group(1) if image else "",
+            available=bool(status) and clean(status.group(1)).lower().startswith("dispo"),
+        ))
+    return items
+
+
 @dataclass
 class Source:
     key: str  # name in state.json
@@ -288,6 +354,10 @@ SOURCES = [
     Source("italie-musique", "Italie Musique (Paris 13e)", IM_COLLECTION, italie_musique),
     Source("centrale-guitars", "Centrale Guitars (Paris 9e)", CG_LIST, centrale, keep=centrale_acoustic),
     Source("california-music", "California Music (Essonne)", f"{CM_BASE}/guitares-acoustiques/5--1-fr", california),
+    Source("woodstore", "Woodstore (Paris 9e)", f"{WOODSTORE}/guitares", woodstore, keep=acoustic_description),
+    Source("guitare-collection", "Guitare Collection (Paris 9e)", GC_LIST, guitare_collection),
+    Source("guitar-street", "Guitar Street (Paris 9e)", f"{GUITAR_STREET}/categorie-produit/guitares-occasions/",
+           guitar_street, image=woocommerce_image(GUITAR_STREET), keep=acoustic_description),
 ]
 
 
