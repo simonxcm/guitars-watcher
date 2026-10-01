@@ -1,7 +1,7 @@
 # Guitar watch
 
 Sends a phone notification when a new used **acoustic (folk) Martin or Gibson** is listed at one of
-9 shops that sell guitars from private sellers (consignment or buy-back). Electric, classical,
+8 shops in Île-de-France and Nantes that sell guitars from private sellers (consignment or buy-back). Electric, classical,
 archtop and bass guitars are ignored, and so is sold stock.
 Each alert shows the title, the price and a photo, and opens the listing when tapped.
 
@@ -13,8 +13,7 @@ started by a [cron-job.org](https://cron-job.org) timer, with notifications thro
 
 | Shop | What is read | How it stays folk / used / local |
 |---|---|---|
-| [Guitare Village](https://www.guitare-village.com/website/index.php/categorie-produit/occasion/acoustiques/) | WooCommerce JSON API, one search per brand in the used "Acoustiques" category | Acoustic basses skipped |
-| [Vinstage Music](https://www.vinstagemusic.fr/instruments-accessoires-occasion/guitares-et-basses/guitares-acoustiques) | Used acoustic page, newest first | Brand from the shop's own label |
+| [Guitare Village](https://www.guitare-village.com/website/index.php/categorie-produit/occasion/acoustiques/), Domont (95) | WooCommerce JSON API, one search per brand in the used "Acoustiques" category | Acoustic basses skipped |
 | [Hurricane Music](https://hurricanemusic.fr/s/330/guitare-occasion-nantes), Nantes | Nantes used guitars page, newest first | Product page must be filed under "Guitare Acoustique" and say "Disponible Hurricane Music Nantes : Oui" |
 | [Galerie Casanova](https://www.galerie-casanova.com/produits/guitares-acoustiques-vintages/), Paris 1er | WooCommerce JSON API, "flat-top" category | Classical and archtop guitars are in other categories |
 | [Bass N Guitar](https://bassnguitar.fr/categorie/guitares-acoustiques/), Paris 19e | WooCommerce JSON API, acoustic category | Paris stock only, not the Avignon shop |

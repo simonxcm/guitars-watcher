@@ -34,8 +34,6 @@ MAX_PAGES = 3
 FAIL_AFTER = 3  # a shop must fail this many runs in a row to fail the run, so one-off outages stay quiet
 
 GV_SITE = "https://www.guitare-village.com/website"
-VM_BASE = "https://www.vinstagemusic.fr"
-VM_LIST = VM_BASE + "/instruments-accessoires-occasion/guitares-et-basses/guitares-acoustiques"
 HM_LIST = "https://hurricanemusic.fr/s/330/guitare-occasion-nantes"
 CASANOVA = "https://www.galerie-casanova.com"
 BASS_N_GUITAR = "https://bassnguitar.fr"
@@ -54,7 +52,7 @@ NOT_FOLK_RE = re.compile(
     r"|archtop|\bl-(?:4|5|7|10|12|30|48|50|75)(?!\d)|super ?[34]00|\bbass",
     re.I)
 
-# Vinstage and California Music declare UTF-8 or nothing but send some Latin-1 bytes.
+# California Music sends Latin-1 bytes in pages read as UTF-8.
 codecs.register_error("latin1_fallback", lambda e: (e.object[e.start:e.end].decode("latin-1"), e.end))
 
 
@@ -166,30 +164,6 @@ def guitarium(known):
 
 
 # --- Other shops ----------------------------------------------------------------------------
-
-def vinstage(known):
-    return read_pages(lambda page: VM_LIST if page == 1 else f"{VM_LIST}/{page}", parse_vinstage, known)
-
-
-def parse_vinstage(page):
-    items = []
-    for block in re.findall(r'<div class="produit">(.*?)</div>', page, re.S):
-        link = re.search(r'<a href="([^"]*/(\d+))" class="libelle">(.*?)</a>', block, re.S)
-        if not link:
-            continue
-        brand = re.search(r'<span class="marque">(.*?)</span>', block, re.S)
-        price = re.search(r'<span class="prix">(.*?)</span>', block, re.S)
-        image = re.search(r"url\(([^)]+)\)", block)
-        items.append(Listing(
-            id=link.group(2),
-            title=clean(link.group(3)),
-            price=clean(price.group(1)) if price else "",
-            url=urllib.parse.urljoin(VM_BASE, link.group(1)),
-            brand=clean(brand.group(1)) if brand else "",
-            image=urllib.parse.urljoin(VM_BASE, image.group(1)) if image else "",
-        ))
-    return items
-
 
 def hurricane(known):
     return read_pages(lambda page: f"{HM_LIST}?order=product.date_add.desc&page={page}", parse_hurricane, known)
@@ -303,7 +277,6 @@ class Source:
 SOURCES = [
     Source("guitare-village", "Guitare Village", f"{GV_SITE}/index.php/categorie-produit/occasion/acoustiques/",
            guitare_village, image=woocommerce_image(GV_SITE)),
-    Source("vinstage", "Vinstage Music", VM_LIST, vinstage),
     Source("hurricane", "Hurricane Music (Nantes)", HM_LIST, hurricane, keep=nantes_acoustic),
     Source("galerie-casanova", "Galerie Casanova (Paris 1er)", f"{CASANOVA}/produits/guitares-acoustiques-vintages/",
            casanova, image=woocommerce_image(CASANOVA)),
@@ -398,6 +371,12 @@ def main():
                 notify(source, wanted, args.dry_run)
         seen.update({l.id: l.title for l in new})
         state["sources"][source.key] = seen
+
+    # Forget shops removed from SOURCES.
+    configured = {source.key for source in SOURCES}
+    state["sources"] = {key: seen for key, seen in state["sources"].items() if key in configured}
+    for key in set(failures) - configured:
+        del failures[key]
 
     # A dated heartbeat commits at least once a day, so GitHub never pauses the schedule for inactivity.
     state["last_check"] = date.today().isoformat()
