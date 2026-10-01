@@ -46,10 +46,11 @@ CM_BASE = "https://www.californiamusic.fr"
 # "Guitare Martin D-28", not "Carl Martin" pedals.
 BRAND_RE = re.compile(r"^(?:guitare\s+)?(?:(?:19|20)\d\d\s+)?(?:c\.?\s*f\.?\s+)?(?:" + "|".join(BRANDS) + r")\b", re.I)
 
-# Folk guitars only: some shops file nylon-string, archtop and bass models under "acoustic".
+# Folk guitars only: some shops file nylon-string, archtop, bass and other fretted models under "acoustic".
 NOT_FOLK_RE = re.compile(
     r"classi|nylon|\bcec\b|chet atkins ce\b|\bn-(?:10|20)\b|\bc-\d\b"
-    r"|archtop|\bl-(?:4|5|7|10|12|30|48|50|75)(?!\d)|super ?[34]00|\bbass",
+    r"|archtop|\bl-(?:4|5|7|10|12|30|48|50|75)(?!\d)|super ?[34]00|\bbass"
+    r"|mandol|ukul|\buke\b|banjo",
     re.I)
 
 # California Music sends Latin-1 bytes in pages read as UTF-8.

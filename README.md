@@ -23,7 +23,8 @@ started by a [cron-job.org](https://cron-job.org) timer, with notifications thro
 | [California Music](https://www.californiamusic.fr/guitares-acoustiques/5--1-fr), Essonne | Acoustic page, every page (sorted by price) | Only guitars with the "okaz" (used) badge |
 
 For every shop, the title must start with Martin or Gibson (so "Carl Martin" pedals don't count),
-and titles naming a classical, nylon, archtop or bass model (Chet Atkins CEC, L-5, Super 400…) are skipped.
+and titles naming a classical, nylon, archtop or bass model (Chet Atkins CEC, L-5, Super 400…),
+or a mandolin, ukulele or banjo, are skipped.
 On newest-first lists, page 2–3 are read only if page 1 is entirely new.
 
 `state.json` stores the IDs already seen. A listing is notified once, the first time it appears.
