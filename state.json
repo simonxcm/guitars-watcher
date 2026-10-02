@@ -296,8 +296,5 @@
   }
  },
  "last_check": "2026-10-02",
- "failures": {
-  "italie-musique": 2,
-  "bass-n-guitar": 1
- }
+ "failures": {}
 }
