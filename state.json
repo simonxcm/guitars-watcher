@@ -236,7 +236,8 @@
    "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:6a315b6dbe98a524f4a91597": "GIBSON LP '57 HISTORIC MAKOVERS",
    "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:6a2a897246e5b831120ca0a5": "FENDER TL 69 RW 1985",
    "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:66f564994612e010a9b53f94": "FENDER STRATOCASTER RI 62 JAPAN",
-   "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:69fef2355375d140d84e9e7d": "GIBSON ES 175 1974"
+   "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:69fef2355375d140d84e9e7d": "GIBSON ES 175 1974",
+   "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:6ac0c63e6fcf1875e8208aca": "FENDER JAGUAR L 1963"
   },
   "guitar-street": {
    "10976": "Occasion Collings D2H 2014 N°23824",
@@ -297,6 +298,7 @@
  },
  "last_check": "2026-10-03",
  "failures": {
-  "italie-musique": 9
+  "italie-musique": 10,
+  "guitare-collection": 1
  }
 }
