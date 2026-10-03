@@ -297,8 +297,5 @@
   }
  },
  "last_check": "2026-10-03",
- "failures": {
-  "italie-musique": 10,
-  "guitare-collection": 1
- }
+ "failures": {}
 }
