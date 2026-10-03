@@ -145,7 +145,8 @@
    "7354": "Cuenca K-10 Natural Nylon",
    "7317": "Waymann Keystone State Ukulele",
    "70769": "Maurice Dupont AU45 Natural 2022",
-   "70826": "Yamaha SLG-100S Silent Guitar"
+   "70826": "Yamaha SLG-100S Silent Guitar",
+   "71272": "Gibson Americana Ranger 2005 Natural Satin"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -297,5 +298,7 @@
   }
  },
  "last_check": "2026-10-03",
- "failures": {}
+ "failures": {
+  "italie-musique": 1
+ }
 }
