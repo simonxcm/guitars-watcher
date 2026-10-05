@@ -32,6 +32,7 @@ USER_AGENT = "Mozilla/5.0 (compatible; guitar-watch/1.0; personal stock alert)"
 MAX_PUSHES = 10  # more new listings than this in one run gets a single summary push
 MAX_PAGES = 3
 FAIL_AFTER = 3  # a shop must fail this many runs in a row to fail the run, so one-off outages stay quiet
+REMIND_EVERY = 12  # while it stays broken, fail again every this many runs (about once a day), not every run
 
 GV_SITE = "https://www.guitare-village.com/website"
 HM_LIST = "https://hurricanemusic.fr/s/330/guitare-occasion-nantes"
@@ -418,6 +419,7 @@ def main():
 
     state = load_state()
     failures = state.setdefault("failures", {})
+    errors = state.setdefault("errors", {})  # last error per failing shop, readable without GitHub's logs
     for source in SOURCES:
         seen = state["sources"].get(source.key)
         try:
@@ -428,9 +430,11 @@ def main():
             wanted = [l for l in new if seen is not None and l.wanted() and (not source.keep or source.keep(l))]
         except Exception as error:
             failures[source.key] = failures.get(source.key, 0) + 1
+            errors[source.key] = f"{date.today().isoformat()}: {error}"
             print(f"{source.key}: FAILED ({failures[source.key]} in a row): {error}")
             continue
         failures.pop(source.key, None)
+        errors.pop(source.key, None)
         if seen is None:
             print(f"{source.key}: first run, recorded {len(listings)} listings without notifying")
             seen = {}
@@ -448,6 +452,8 @@ def main():
     state["sources"] = {key: seen for key, seen in state["sources"].items() if key in configured}
     for key in set(failures) - configured:
         del failures[key]
+    for key in set(errors) - configured:
+        del errors[key]
 
     # A dated heartbeat commits at least once a day, so GitHub never pauses the schedule for inactivity.
     state["last_check"] = date.today().isoformat()
@@ -455,8 +461,12 @@ def main():
         save_state(state)
     broken = [key for key, count in failures.items() if count >= FAIL_AFTER]
     if broken:
-        print(f"Failing the run: {', '.join(broken)} failed {FAIL_AFTER}+ runs in a row, the website may have changed.")
-    sys.exit(1 if broken else 0)
+        print(f"Still failing: {', '.join(f'{key} ({failures[key]} runs)' for key in broken)}.")
+    # GitHub emails on each failed run: fail when a shop reaches FAIL_AFTER, then every REMIND_EVERY runs.
+    alert = [key for key in broken if (failures[key] - FAIL_AFTER) % REMIND_EVERY == 0]
+    if alert:
+        print(f"Failing the run for {', '.join(alert)}: the website may have changed or be blocking GitHub.")
+    sys.exit(1 if alert else 0)
 
 
 if __name__ == "__main__":
