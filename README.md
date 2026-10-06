@@ -1,7 +1,7 @@
 # Guitar watch
 
 Sends a phone notification when a new used **acoustic (folk) Martin or Gibson** is listed at one of
-11 shops in Île-de-France and Nantes that sell guitars from private sellers (consignment or buy-back). Electric, classical,
+11 shops in Île-de-France and Nantes (plus Bass N Guitar's Avignon shop) that sell guitars from private sellers (consignment or buy-back). Electric, classical,
 archtop and bass guitars are ignored, and so is sold stock.
 Each alert shows the title, the price and a photo, and opens the listing when tapped.
 
@@ -16,7 +16,7 @@ started by a [cron-job.org](https://cron-job.org) timer, with notifications thro
 | [Guitare Village](https://www.guitare-village.com/website/index.php/categorie-produit/occasion/acoustiques/), Domont (95) | WooCommerce JSON API, one search per brand in the used "Acoustiques" category | Acoustic basses skipped |
 | [Hurricane Music](https://hurricanemusic.fr/s/330/guitare-occasion-nantes), Nantes | Nantes used guitars page, newest first | Product page must be filed under "Guitare Acoustique" and say "Disponible Hurricane Music Nantes : Oui" |
 | [Galerie Casanova](https://www.galerie-casanova.com/produits/guitares-acoustiques-vintages/), Paris 1er | WooCommerce JSON API, "flat-top" category | Classical and archtop guitars are in other categories |
-| [Bass N Guitar](https://bassnguitar.fr/categorie/guitares-acoustiques/), Paris 19e | WooCommerce JSON API, acoustic category | Paris stock only, not the Avignon shop |
+| [Bass N Guitar](https://bassnguitar.fr/categorie/guitares-acoustiques/), Paris 19e and Avignon | WooCommerce JSON API, acoustic category | Both shops; the alert says which one holds the guitar |
 | [Le Guitarium](https://leguitarium.fr/categorie-produit/guitares-acoustiques/), Paris 9e | WooCommerce JSON API, "folk" category | |
 | [Italie Musique](https://italie-musique.com/collections/guitare-acoustique-occasion-paris), Paris 13e | Shopify JSON of the used acoustic collection | |
 | [Centrale Guitars "Seconde Vie"](https://centraleguitars.com/797-seconde-vie), Paris 9e | Used section as JSON, newest first | Electrics and basses skipped using the type in the product URL |

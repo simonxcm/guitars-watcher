@@ -71,6 +71,7 @@ class Listing:
     image: str = ""
     available: bool = True
     details: str = ""  # description, for shops that only say there whether a guitar is acoustic
+    location: str = ""  # which shop holds it, for businesses with several
 
     def wanted(self):
         return (self.available and bool(BRAND_RE.match(self.brand or self.title))
@@ -117,7 +118,7 @@ def read_pages(url_for_page, parse, known, headers=None):
 
 # --- WooCommerce shops: public Store API, newest first --------------------------------------
 
-def woocommerce(site, keep=lambda product: True, **params):
+def woocommerce(site, keep=lambda product: True, location=lambda product: "", **params):
     query = urllib.parse.urlencode({
         "orderby": "date", "order": "desc", "per_page": 100,
         "_fields": "id,name,permalink,prices,categories,is_in_stock", **params,
@@ -133,6 +134,7 @@ def woocommerce(site, keep=lambda product: True, **params):
                 url=product["permalink"],
                 available=product["is_in_stock"],
                 details=clean(f"{product.get('short_description') or ''} {product.get('description') or ''}"),
+                location=location(product),
             ))
     return listings
 
@@ -160,10 +162,11 @@ def casanova(known):
 
 
 def bass_n_guitar(known):
-    """The acoustic category mixes the Paris and Avignon shops."""
-    in_paris = lambda product: any(term["name"] == "Paris"
-                                   for attribute in product["attributes"] for term in attribute["terms"])
-    return woocommerce(BASS_N_GUITAR, in_paris, category=46, _fields="id,name,permalink,prices,is_in_stock,attributes")
+    """Paris and Avignon shops, told apart by the "Emplacement" attribute."""
+    where = lambda product: ", ".join(term["name"] for attribute in product["attributes"]
+                                      if attribute["name"] == "Emplacement" for term in attribute["terms"])
+    return woocommerce(BASS_N_GUITAR, location=where, category=46,
+                       _fields="id,name,permalink,prices,is_in_stock,attributes")
 
 
 def guitarium(known):
@@ -348,7 +351,7 @@ SOURCES = [
     Source("hurricane", "Hurricane Music (Nantes)", HM_LIST, hurricane, keep=nantes_acoustic),
     Source("galerie-casanova", "Galerie Casanova (Paris 1er)", f"{CASANOVA}/produits/guitares-acoustiques-vintages/",
            casanova, image=woocommerce_image(CASANOVA)),
-    Source("bass-n-guitar", "Bass N Guitar (Paris 19e)", f"{BASS_N_GUITAR}/categorie/guitares-acoustiques/",
+    Source("bass-n-guitar", "Bass N Guitar", f"{BASS_N_GUITAR}/categorie/guitares-acoustiques/",
            bass_n_guitar, image=woocommerce_image(BASS_N_GUITAR)),
     Source("le-guitarium", "Le Guitarium (Paris 9e)", f"{GUITARIUM}/categorie-produit/guitares-acoustiques/",
            guitarium, image=woocommerce_image(GUITARIUM)),
@@ -384,7 +387,7 @@ def notify(source, listings, dry_run):
             except Exception as error:  # a missing photo should never block the alert
                 print(f"  no image for {listing.id}: {error}")
         payload = {"title": " · ".join(filter(None, [listing.title, listing.price])),
-                   "message": f"New listing at {shop}",
+                   "message": f"New listing at {shop}" + (f", {listing.location}" if listing.location else ""),
                    "click": listing.url, "tags": ["guitar"], "priority": 4}
         if listing.image:
             payload["attach"] = listing.image
