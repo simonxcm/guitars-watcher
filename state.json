@@ -102,7 +102,8 @@
    "14242": "GIBSON J-200N 1957",
    "20118": "MARTIN D-28 AUTHENTIC ’41 2013",
    "16865": "MARTIN 00-21 1966",
-   "16464": "MARTIN D-18 1969"
+   "16464": "MARTIN D-18 1969",
+   "21629": "MARTIN 0-15 1958"
   },
   "bass-n-guitar": {
    "70009": "Dobro M36 The Rose 1994",
@@ -357,7 +358,7 @@
  },
  "last_check": "2026-10-07",
  "failures": {
-  "italie-musique": 2
+  "italie-musique": 3
  },
  "errors": {
   "italie-musique": "2026-10-07: HTTP Error 429: Too Many Requests"
