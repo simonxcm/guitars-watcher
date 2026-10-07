@@ -205,7 +205,8 @@
    "7159": "Furch Blue D-CM Natural",
    "7156": "Fender Malibu CE 2015 Fiesta Red",
    "7153": "Maton TE 1 Tommy Emmanuel 2012",
-   "7150": "Martin 000-15 Mahogany 2007"
+   "7150": "Martin 000-15 Mahogany 2007",
+   "7147": "Martin CEO-7 Autumn Sunset Burst"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -358,7 +359,7 @@
  },
  "last_check": "2026-10-07",
  "failures": {
-  "italie-musique": 4
+  "italie-musique": 5
  },
  "errors": {
   "italie-musique": "2026-10-07: HTTP Error 429: Too Many Requests"
