@@ -358,10 +358,6 @@
   }
  },
  "last_check": "2026-10-08",
- "failures": {
-  "italie-musique": 2
- },
- "errors": {
-  "italie-musique": "2026-10-08: HTTP Error 429: Too Many Requests"
- }
+ "failures": {},
+ "errors": {}
 }
