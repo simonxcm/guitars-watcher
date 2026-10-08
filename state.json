@@ -276,7 +276,8 @@
    "5861": "Cort Custom Shop Series - MASTER PIECE E-LE2 dreadnought année 2005",
    "5111": "Yamaha CJ-32 HANDCRAFTED CUSTOM année 2006",
    "5888": "Taylor K 10 CE KOA année 2011",
-   "5903": "Gibson SJ 200 STANDARD NATURAL année 2011"
+   "5903": "Gibson SJ 200 STANDARD NATURAL année 2011",
+   "5939": "Takamine TOBY KEITH signature EF250 TK MIJ"
   },
   "woodstore": {
    "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:6ab782931b21a667d4ae2d48": "GIBSON NIGHTHAWK CST3 1991",
@@ -359,6 +360,10 @@
   }
  },
  "last_check": "2026-10-08",
- "failures": {},
- "errors": {}
+ "failures": {
+  "italie-musique": 1
+ },
+ "errors": {
+  "italie-musique": "2026-10-08: HTTP Error 429: Too Many Requests"
+ }
 }
