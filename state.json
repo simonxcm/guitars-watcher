@@ -359,7 +359,11 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-10-08",
- "failures": {},
- "errors": {}
+ "last_check": "2026-10-09",
+ "failures": {
+  "italie-musique": 1
+ },
+ "errors": {
+  "italie-musique": "2026-10-09: HTTP Error 429: Too Many Requests"
+ }
 }
