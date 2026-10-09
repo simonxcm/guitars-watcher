@@ -300,7 +300,8 @@
    "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:6a2a897246e5b831120ca0a5": "FENDER TL 69 RW 1985",
    "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:66f564994612e010a9b53f94": "FENDER STRATOCASTER RI 62 JAPAN",
    "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:69fef2355375d140d84e9e7d": "GIBSON ES 175 1974",
-   "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:6ac0c63e6fcf1875e8208aca": "FENDER JAGUAR L 1963"
+   "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:6ac0c63e6fcf1875e8208aca": "FENDER JAGUAR L 1963",
+   "60c7323eba483876810d442d:60eefe1e2029ca17bd4248be:6ac91272fa895f062b3e14f5": "RICKENBACKER 330 JG '07"
   },
   "guitar-street": {
    "10976": "Occasion Collings D2H 2014 N°23824",
@@ -361,7 +362,7 @@
  },
  "last_check": "2026-10-09",
  "failures": {
-  "italie-musique": 2
+  "italie-musique": 3
  },
  "errors": {
   "italie-musique": "2026-10-09: HTTP Error 429: Too Many Requests"
