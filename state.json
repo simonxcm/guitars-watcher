@@ -207,7 +207,8 @@
    "7153": "Maton TE 1 Tommy Emmanuel 2012",
    "7150": "Martin 000-15 Mahogany 2007",
    "7147": "Martin CEO-7 Autumn Sunset Burst",
-   "7143": "Sire A3 DS Natural 2020"
+   "7143": "Sire A3 DS Natural 2020",
+   "71051": "Boswell 0-14MK/TR-LTD Mark Knopfler Signature 2024 Limited Edition"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -362,7 +363,7 @@
  },
  "last_check": "2026-10-09",
  "failures": {
-  "italie-musique": 4
+  "italie-musique": 5
  },
  "errors": {
   "italie-musique": "2026-10-09: HTTP Error 429: Too Many Requests"
