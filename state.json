@@ -364,10 +364,6 @@
   }
  },
  "last_check": "2026-10-11",
- "failures": {
-  "hurricane": 1
- },
- "errors": {
-  "hurricane": "2026-10-11: <urlopen error timed out>"
- }
+ "failures": {},
+ "errors": {}
 }
