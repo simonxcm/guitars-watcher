@@ -364,10 +364,6 @@
   }
  },
  "last_check": "2026-10-13",
- "failures": {
-  "bass-n-guitar": 1
- },
- "errors": {
-  "bass-n-guitar": "2026-10-13: Expecting value: line 1 column 1 (char 0)"
- }
+ "failures": {},
+ "errors": {}
 }
