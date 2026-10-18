@@ -214,7 +214,8 @@
    "71051": "Boswell 0-14MK/TR-LTD Mark Knopfler Signature 2024 Limited Edition",
    "72308": "Santa Cruz D 2000 Natural",
    "72341": "Martin 00-15M Mahogany 2026",
-   "72456": "Gibson Hummingbird Original 2023 Heritage Cherry Sunburst"
+   "72456": "Gibson Hummingbird Original 2023 Heritage Cherry Sunburst",
+   "72657": "Taylor 210CE Natural 2015 LH Gaucher"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -377,7 +378,7 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-10-17",
+ "last_check": "2026-10-18",
  "failures": {},
  "errors": {}
 }
