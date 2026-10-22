@@ -386,6 +386,10 @@
   }
  },
  "last_check": "2026-10-22",
- "failures": {},
- "errors": {}
+ "failures": {
+  "woodstore": 1
+ },
+ "errors": {
+  "woodstore": "2026-10-22: <urlopen error [SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Hostname mismatch, certificate is not valid for 'www.woodstore.fr'. (_ssl.c:1000)>"
+ }
 }
