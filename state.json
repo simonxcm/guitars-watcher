@@ -387,11 +387,9 @@
  },
  "last_check": "2026-10-23",
  "failures": {
-  "woodstore": 6,
-  "guitare-collection": 1
+  "woodstore": 7
  },
  "errors": {
-  "woodstore": "2026-10-23: nothing listed at all, has the website changed?",
-  "guitare-collection": "2026-10-23: <urlopen error timed out>"
+  "woodstore": "2026-10-23: nothing listed at all, has the website changed?"
  }
 }
