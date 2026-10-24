@@ -217,7 +217,8 @@
    "72341": "Martin 00-15M Mahogany 2026",
    "72456": "Gibson Hummingbird Original 2023 Heritage Cherry Sunburst",
    "72657": "Taylor 210CE Natural 2015 LH Gaucher",
-   "72831": "Gibson Chet Atkins CE 1988 Natural"
+   "72831": "Gibson Chet Atkins CE 1988 Natural",
+   "70801": "Headway HJ-523 Standard Sunburst"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -388,7 +389,7 @@
  },
  "last_check": "2026-10-24",
  "failures": {
-  "woodstore": 22
+  "woodstore": 23
  },
  "errors": {
   "woodstore": "2026-10-24: nothing listed at all, has the website changed?"
