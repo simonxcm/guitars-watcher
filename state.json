@@ -387,13 +387,11 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-10-24",
+ "last_check": "2026-10-25",
  "failures": {
-  "woodstore": 28,
-  "guitare-collection": 1
+  "woodstore": 29
  },
  "errors": {
-  "woodstore": "2026-10-24: nothing listed at all, has the website changed?",
-  "guitare-collection": "2026-10-24: <urlopen error timed out>"
+  "woodstore": "2026-10-25: nothing listed at all, has the website changed?"
  }
 }
