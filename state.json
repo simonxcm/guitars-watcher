@@ -219,7 +219,8 @@
    "72657": "Taylor 210CE Natural 2015 LH Gaucher",
    "72831": "Gibson Chet Atkins CE 1988 Natural",
    "70801": "Headway HJ-523 Standard Sunburst",
-   "73071": "Fender Malibu 1985 Sunburst made in Korea"
+   "73071": "Fender Malibu 1985 Sunburst made in Korea",
+   "56200": "Taylor 528e Natural 2013"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -390,7 +391,7 @@
  },
  "last_check": "2026-10-26",
  "failures": {
-  "woodstore": 49
+  "woodstore": 50
  },
  "errors": {
   "woodstore": "2026-10-26: nothing listed at all, has the website changed?"
