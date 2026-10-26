@@ -218,7 +218,8 @@
    "72456": "Gibson Hummingbird Original 2023 Heritage Cherry Sunburst",
    "72657": "Taylor 210CE Natural 2015 LH Gaucher",
    "72831": "Gibson Chet Atkins CE 1988 Natural",
-   "70801": "Headway HJ-523 Standard Sunburst"
+   "70801": "Headway HJ-523 Standard Sunburst",
+   "73071": "Fender Malibu 1985 Sunburst made in Korea"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -389,7 +390,7 @@
  },
  "last_check": "2026-10-26",
  "failures": {
-  "woodstore": 47
+  "woodstore": 48
  },
  "errors": {
   "woodstore": "2026-10-26: nothing listed at all, has the website changed?"
