@@ -238,7 +238,9 @@
    "42245": "EPIPHONE Texan FT-79 de 1967",
    "51907": "Gibson LG-2 de 1951",
    "51836": "MARTIN 000-17E Black Smoke de 2024",
-   "51867": "Martin 000-18 Golden Era 2024"
+   "51867": "Martin 000-18 Golden Era 2024",
+   "51731": "GIBSON SJN Country Western 1968",
+   "52110": "EPIPHONE TEXAN FT-79 Sunburst de 1966"
   },
   "italie-musique": {
    "15559081230711": "Guitare Martin CEO-9",
@@ -391,7 +393,7 @@
  },
  "last_check": "2026-10-27",
  "failures": {
-  "woodstore": 58
+  "woodstore": 59
  },
  "errors": {
   "woodstore": "2026-10-27: nothing listed at all, has the website changed?"
