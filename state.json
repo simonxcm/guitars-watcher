@@ -220,7 +220,9 @@
    "72831": "Gibson Chet Atkins CE 1988 Natural",
    "70801": "Headway HJ-523 Standard Sunburst",
    "73071": "Fender Malibu 1985 Sunburst made in Korea",
-   "56200": "Taylor 528e Natural 2013"
+   "56200": "Taylor 528e Natural 2013",
+   "72962": "Martin D-41 Natural 2016",
+   "72958": "Santa Cruz 00 Natural 2006"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -391,13 +393,11 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-10-27",
+ "last_check": "2026-10-28",
  "failures": {
-  "woodstore": 62,
-  "bass-n-guitar": 2
+  "woodstore": 63
  },
  "errors": {
-  "woodstore": "2026-10-27: nothing listed at all, has the website changed?",
-  "bass-n-guitar": "2026-10-27: The read operation timed out"
+  "woodstore": "2026-10-28: nothing listed at all, has the website changed?"
  }
 }
