@@ -395,11 +395,9 @@
  },
  "last_check": "2026-10-29",
  "failures": {
-  "woodstore": 74,
-  "galerie-casanova": 1
+  "woodstore": 75
  },
  "errors": {
-  "woodstore": "2026-10-29: nothing listed at all, has the website changed?",
-  "galerie-casanova": "2026-10-29: HTTP Error 522: <none>"
+  "woodstore": "2026-10-29: nothing listed at all, has the website changed?"
  }
 }
