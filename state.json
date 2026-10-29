@@ -222,7 +222,8 @@
    "73071": "Fender Malibu 1985 Sunburst made in Korea",
    "56200": "Taylor 528e Natural 2013",
    "72962": "Martin D-41 Natural 2016",
-   "72958": "Santa Cruz 00 Natural 2006"
+   "72958": "Santa Cruz 00 Natural 2006",
+   "73384": "Martin 000-EC Eric Clapton Signature 30th Anniversary 2025 Antique Toner"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -395,7 +396,7 @@
  },
  "last_check": "2026-10-29",
  "failures": {
-  "woodstore": 80
+  "woodstore": 81
  },
  "errors": {
   "woodstore": "2026-10-29: nothing listed at all, has the website changed?"
