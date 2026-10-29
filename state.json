@@ -395,7 +395,7 @@
  },
  "last_check": "2026-10-29",
  "failures": {
-  "woodstore": 76
+  "woodstore": 77
  },
  "errors": {
   "woodstore": "2026-10-29: nothing listed at all, has the website changed?"
