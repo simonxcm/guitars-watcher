@@ -393,11 +393,13 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-10-28",
+ "last_check": "2026-10-29",
  "failures": {
-  "woodstore": 72
+  "woodstore": 73,
+  "guitar-street": 1
  },
  "errors": {
-  "woodstore": "2026-10-28: nothing listed at all, has the website changed?"
+  "woodstore": "2026-10-29: nothing listed at all, has the website changed?",
+  "guitar-street": "2026-10-29: HTTP Error 500: Internal Server Error"
  }
 }
