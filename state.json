@@ -395,11 +395,11 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-10-31",
+ "last_check": "2026-11-01",
  "failures": {
-  "woodstore": 105
+  "woodstore": 106
  },
  "errors": {
-  "woodstore": "2026-10-31: nothing listed at all, has the website changed?"
+  "woodstore": "2026-11-01: nothing listed at all, has the website changed?"
  }
 }
