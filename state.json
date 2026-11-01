@@ -397,9 +397,11 @@
  },
  "last_check": "2026-11-01",
  "failures": {
-  "woodstore": 114
+  "woodstore": 115,
+  "bass-n-guitar": 1
  },
  "errors": {
-  "woodstore": "2026-11-01: nothing listed at all, has the website changed?"
+  "woodstore": "2026-11-01: nothing listed at all, has the website changed?",
+  "bass-n-guitar": "2026-11-01: HTTP Error 404: Not Found"
  }
 }
