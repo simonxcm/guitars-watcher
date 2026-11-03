@@ -397,11 +397,13 @@
  },
  "last_check": "2026-11-03",
  "failures": {
-  "woodstore": 134,
-  "bass-n-guitar": 20
+  "woodstore": 135,
+  "bass-n-guitar": 21,
+  "galerie-casanova": 1
  },
  "errors": {
   "woodstore": "2026-11-03: nothing listed at all, has the website changed?",
-  "bass-n-guitar": "2026-11-03: HTTP Error 404: Not Found"
+  "bass-n-guitar": "2026-11-03: HTTP Error 404: Not Found",
+  "galerie-casanova": "2026-11-03: [Errno 104] Connection reset by peer"
  }
 }
