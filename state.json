@@ -397,8 +397,8 @@
  },
  "last_check": "2026-11-04",
  "failures": {
-  "woodstore": 138,
-  "bass-n-guitar": 24
+  "woodstore": 139,
+  "bass-n-guitar": 25
  },
  "errors": {
   "woodstore": "2026-11-04: nothing listed at all, has the website changed?",
