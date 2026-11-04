@@ -395,15 +395,13 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-11-03",
+ "last_check": "2026-11-04",
  "failures": {
-  "woodstore": 135,
-  "bass-n-guitar": 21,
-  "galerie-casanova": 1
+  "woodstore": 136,
+  "bass-n-guitar": 22
  },
  "errors": {
-  "woodstore": "2026-11-03: nothing listed at all, has the website changed?",
-  "bass-n-guitar": "2026-11-03: HTTP Error 404: Not Found",
-  "galerie-casanova": "2026-11-03: [Errno 104] Connection reset by peer"
+  "woodstore": "2026-11-04: nothing listed at all, has the website changed?",
+  "bass-n-guitar": "2026-11-04: HTTP Error 404: Not Found"
  }
 }
