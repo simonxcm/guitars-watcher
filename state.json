@@ -87,7 +87,11 @@
    "407479": "IBANEZ PM-3 AVEC ETUI",
    "407806": "PRS GUITARS MCCARTY USA EMERALD GREEN 10 TOP (2000)",
    "407805": "PEAVEY WOLGANG SPECIAL USA 2001 AVEC CASE ORIGINE",
-   "407878": "FENDER AMERICAN DELUXE STRAT + ETUI + CABLE"
+   "407878": "FENDER AMERICAN DELUXE STRAT + ETUI + CABLE",
+   "408107": "KALA STGE-C",
+   "408106": "TAKAMINE SANTA FE ESF-48C + ETUI",
+   "408105": "TAYLOR 150E + HOUSSE",
+   "408104": "TAYLOR GS MINI KOA PLUS"
   },
   "galerie-casanova": {
    "21556": "MARTIN 0-16NY 1970",
@@ -395,13 +399,13 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-11-04",
+ "last_check": "2026-11-05",
  "failures": {
-  "woodstore": 145,
-  "bass-n-guitar": 31
+  "woodstore": 146,
+  "bass-n-guitar": 32
  },
  "errors": {
-  "woodstore": "2026-11-04: nothing listed at all, has the website changed?",
-  "bass-n-guitar": "2026-11-04: HTTP Error 404: Not Found"
+  "woodstore": "2026-11-05: nothing listed at all, has the website changed?",
+  "bass-n-guitar": "2026-11-05: HTTP Error 404: Not Found"
  }
 }
