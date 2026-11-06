@@ -248,7 +248,9 @@
    "51836": "MARTIN 000-17E Black Smoke de 2024",
    "51867": "Martin 000-18 Golden Era 2024",
    "51731": "GIBSON SJN Country Western 1968",
-   "52110": "EPIPHONE TEXAN FT-79 Sunburst de 1966"
+   "52110": "EPIPHONE TEXAN FT-79 Sunburst de 1966",
+   "51656": "TAYLOR 315-CE de 2008",
+   "52314": "BOURGEOIS CUSTOM OM IBMA de 2007"
   },
   "italie-musique": {
    "15559081230711": "Guitare Martin CEO-9",
@@ -401,8 +403,8 @@
  },
  "last_check": "2026-11-06",
  "failures": {
-  "woodstore": 160,
-  "bass-n-guitar": 46
+  "woodstore": 161,
+  "bass-n-guitar": 47
  },
  "errors": {
   "woodstore": "2026-11-06: nothing listed at all, has the website changed?",
