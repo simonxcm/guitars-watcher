@@ -401,13 +401,13 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-11-06",
+ "last_check": "2026-11-07",
  "failures": {
-  "woodstore": 165,
-  "bass-n-guitar": 51
+  "woodstore": 166,
+  "bass-n-guitar": 52
  },
  "errors": {
-  "woodstore": "2026-11-06: nothing listed at all, has the website changed?",
-  "bass-n-guitar": "2026-11-06: HTTP Error 404: Not Found"
+  "woodstore": "2026-11-07: nothing listed at all, has the website changed?",
+  "bass-n-guitar": "2026-11-07: HTTP Error 404: Not Found"
  }
 }
