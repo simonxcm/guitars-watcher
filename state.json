@@ -199,7 +199,10 @@
    "1460": "Lâg Tramontane T100ASCE Natural",
    "1454": "Cuenca K-10 Natural Nylon",
    "1452": "Waymann Keystone State Ukulele",
-   "1451": "Epiphone EJ-200SCE Natural 2016"
+   "1451": "Epiphone EJ-200SCE Natural 2016",
+   "11545": "Martin 5-15 Custom Mahogany Natural 2008",
+   "11542": "Martin D-15M Mahogany Natural 2017",
+   "3462": "Martin D-28 Standard 2012 Natural"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -412,12 +415,6 @@
   }
  },
  "last_check": "2026-11-10",
- "failures": {
-  "woodstore": 202,
-  "bass-n-guitar": 88
- },
- "errors": {
-  "woodstore": "2026-11-10: nothing listed at all, has the website changed?",
-  "bass-n-guitar": "2026-11-10: HTTP Error 404: Not Found"
- }
+ "failures": {},
+ "errors": {}
 }
