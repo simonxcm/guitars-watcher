@@ -118,7 +118,7 @@ def read_pages(url_for_page, parse, known, headers=None):
 
 # --- WooCommerce shops: public Store API, newest first --------------------------------------
 
-def woocommerce(site, keep=lambda product: True, location=lambda product: "", **params):
+def woocommerce(site, keep=lambda product: True, **params):
     query = urllib.parse.urlencode({
         "orderby": "date", "order": "desc", "per_page": 100,
         "_fields": "id,name,permalink,prices,categories,is_in_stock", **params,
@@ -134,7 +134,6 @@ def woocommerce(site, keep=lambda product: True, location=lambda product: "", **
                 url=product["permalink"],
                 available=product["is_in_stock"],
                 details=clean(f"{product.get('short_description') or ''} {product.get('description') or ''}"),
-                location=location(product),
             ))
     return listings
 
@@ -159,14 +158,6 @@ def guitare_village(known):
 
 def casanova(known):
     return woocommerce(CASANOVA, category="guitares-vintages-flat-top")
-
-
-def bass_n_guitar(known):
-    """Paris and Avignon shops, told apart by the "Emplacement" attribute."""
-    where = lambda product: ", ".join(term["name"] for attribute in product["attributes"]
-                                      if attribute["name"] == "Emplacement" for term in attribute["terms"])
-    return woocommerce(BASS_N_GUITAR, location=where, category=46,
-                       _fields="id,name,permalink,prices,is_in_stock,attributes")
 
 
 def guitarium(known):
@@ -203,6 +194,30 @@ def parse_hurricane(page):
             url=link.group(1),
             brand=brand,
             image=image.group(1) if image else "",
+        ))
+    return items
+
+
+def bass_n_guitar(known):
+    """Paris and Avignon shops: the whole acoustic stock on one page; sold guitars have their own page."""
+    page = fetch(f"{BASS_N_GUITAR}/categorie/guitares-acoustiques/").decode("utf-8", "latin1_fallback")
+    items = []
+    for card in page.split('<a class="product-card"')[1:]:
+        product_id = re.search(r'data-id="(\d+)"', card)
+        name = re.search(r'class="product-name">(.*?)</h2>', card, re.S)
+        link = re.search(r'href="([^"]+)"', card)
+        if not (product_id and name and link):
+            continue
+        price = re.search(r'data-price="([\d.]+)"', card)
+        image = re.search(r'data-original="([^"]+)"', card)
+        shop = re.search(r'class="product-shop">(.*?)</span>', card, re.S)
+        items.append(Listing(
+            id=product_id.group(1),
+            title=clean(name.group(1)),
+            price=euros(float(price.group(1))) if price else "",
+            url=urllib.parse.urljoin(BASS_N_GUITAR, link.group(1)),
+            image=urllib.parse.urljoin(BASS_N_GUITAR, image.group(1)) if image else "",
+            location=clean(shop.group(1)) if shop else "",
         ))
     return items
 
@@ -287,25 +302,28 @@ def acoustic_description(listing):
 
 
 def woodstore(known):
-    """Squarespace: the RSS feed holds the 20 newest guitars, far lighter than the store's JSON."""
-    feed = fetch(f"{WOODSTORE}/guitares?format=rss").decode("utf-8", "latin1_fallback")
-    feed = feed.replace("<![CDATA[", "").replace("]]>", "")
+    """The whole stock on one page; each card carries its status and its description for the search box."""
+    page = fetch(f"{WOODSTORE}/guitares/").decode("utf-8", "latin1_fallback")
     items = []
-    for item in re.findall(r"<item>(.*?)</item>", feed, re.S):
-        link = re.search(r"<link>(.*?)</link>", item, re.S)
-        title = re.search(r"<title>(.*?)</title>", item, re.S)
+    for card in page.split('<a class="card"')[1:]:
+        link = re.search(r'href="(/guitares/[^"]+)"', card)
+        title = re.search(r'class="card-title">(.*?)</h3>', card, re.S)
         if not (link and title):
             continue
-        guid = re.search(r"<guid[^>]*>(.*?)</guid>", item, re.S)
-        description = re.search(r"<description>(.*?)</description>", item, re.S)
-        image = re.search(r'<media:content[^>]+url="([^"]+)"', item)
+        year = re.search(r'class="card-year">(.*?)</span>', card, re.S)
+        name = clean(re.sub(r'<span class="card-year">.*?</span>', "", title.group(1), flags=re.S))
+        price = re.search(r'data-prix="(\d+)"', card)
+        status = re.search(r'data-statut="([^"]*)"', card)
+        description = re.search(r'data-recherche="([^"]*)"', card)
+        image = re.search(r'<img src="([^"]+)"', card)
         items.append(Listing(
-            id=clean((guid or link).group(1)),
-            title=clean(title.group(1)),
-            price="",
-            url=clean(link.group(1)),
-            image=image.group(1) if image else "",
-            details=clean(html.unescape(description.group(1))) if description else "",
+            id=link.group(1).strip("/").rsplit("/", 1)[-1],
+            title=f"{name} {clean(year.group(1))}" if year else name,
+            price=euros(int(price.group(1))) if price else "",
+            url=urllib.parse.urljoin(WOODSTORE, link.group(1)),
+            image=urllib.parse.urljoin(WOODSTORE, image.group(1)) if image else "",
+            available=not status or status.group(1) == "disponible",
+            details=clean(description.group(1)) if description else "",
         ))
     return items
 
@@ -351,14 +369,13 @@ SOURCES = [
     Source("hurricane", "Hurricane Music (Nantes)", HM_LIST, hurricane, keep=nantes_acoustic),
     Source("galerie-casanova", "Galerie Casanova (Paris 1er)", f"{CASANOVA}/produits/guitares-acoustiques-vintages/",
            casanova, image=woocommerce_image(CASANOVA)),
-    Source("bass-n-guitar", "Bass N Guitar", f"{BASS_N_GUITAR}/categorie/guitares-acoustiques/",
-           bass_n_guitar, image=woocommerce_image(BASS_N_GUITAR)),
+    Source("bass-n-guitar", "Bass N Guitar", f"{BASS_N_GUITAR}/categorie/guitares-acoustiques/", bass_n_guitar),
     Source("le-guitarium", "Le Guitarium (Paris 9e)", f"{GUITARIUM}/categorie-produit/guitares-acoustiques/",
            guitarium, image=woocommerce_image(GUITARIUM)),
     Source("italie-musique", "Italie Musique (Paris 13e)", IM_COLLECTION, italie_musique),
     Source("centrale-guitars", "Centrale Guitars (Paris 9e)", CG_LIST, centrale, keep=centrale_acoustic),
     Source("california-music", "California Music (Essonne)", f"{CM_BASE}/guitares-acoustiques/5--1-fr", california),
-    Source("woodstore", "Woodstore (Paris 9e)", f"{WOODSTORE}/guitares", woodstore, keep=acoustic_description),
+    Source("woodstore", "Woodstore (Paris 9e)", f"{WOODSTORE}/guitares/", woodstore, keep=acoustic_description),
     Source("guitare-collection", "Guitare Collection (Paris 9e)", GC_LIST, guitare_collection),
     Source("guitar-street", "Guitar Street (Paris 9e)", f"{GUITAR_STREET}/categorie-produit/guitares-occasions/",
            guitar_street, image=woocommerce_image(GUITAR_STREET), keep=acoustic_description),
