@@ -420,6 +420,10 @@
   }
  },
  "last_check": "2026-11-15",
- "failures": {},
- "errors": {}
+ "failures": {
+  "centrale-guitars": 1
+ },
+ "errors": {
+  "centrale-guitars": "2026-11-15: The read operation timed out"
+ }
 }
