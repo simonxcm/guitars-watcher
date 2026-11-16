@@ -421,9 +421,9 @@
  },
  "last_check": "2026-11-16",
  "failures": {
-  "guitare-collection": 1
+  "italie-musique": 1
  },
  "errors": {
-  "guitare-collection": "2026-11-16: <urlopen error timed out>"
+  "italie-musique": "2026-11-16: HTTP Error 429: Too Many Requests"
  }
 }
