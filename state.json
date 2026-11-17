@@ -202,7 +202,9 @@
    "1451": "Epiphone EJ-200SCE Natural 2016",
    "11545": "Martin 5-15 Custom Mahogany Natural 2008",
    "11542": "Martin D-15M Mahogany Natural 2017",
-   "3462": "Martin D-28 Standard 2012 Natural"
+   "3462": "Martin D-28 Standard 2012 Natural",
+   "11572": "Gibson SJ-200 Standard Jumbo 2012 Antique Natural",
+   "11544": "Martin J-15 Mahogany Natural 2007"
   },
   "le-guitarium": {
    "51538": "BOUCHER HG-56 Heritage Goose",
@@ -421,10 +423,6 @@
   }
  },
  "last_check": "2026-11-17",
- "failures": {
-  "italie-musique": 1
- },
- "errors": {
-  "italie-musique": "2026-11-17: HTTP Error 429: Too Many Requests"
- }
+ "failures": {},
+ "errors": {}
 }
