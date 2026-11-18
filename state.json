@@ -91,7 +91,9 @@
    "408107": "KALA STGE-C",
    "408106": "TAKAMINE SANTA FE ESF-48C + ETUI",
    "408105": "TAYLOR 150E + HOUSSE",
-   "408104": "TAYLOR GS MINI KOA PLUS"
+   "408104": "TAYLOR GS MINI KOA PLUS",
+   "408365": "IBANEZ 2350 1976 (EX-JOHN)",
+   "408361": "GIBSON LES PAUL JUNIOR VINTAGE TOBACCO BURST"
   },
   "galerie-casanova": {
    "21556": "MARTIN 0-16NY 1970",
@@ -422,7 +424,7 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-11-17",
+ "last_check": "2026-11-18",
  "failures": {},
  "errors": {}
 }
