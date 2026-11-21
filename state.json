@@ -428,6 +428,10 @@
   }
  },
  "last_check": "2026-11-21",
- "failures": {},
- "errors": {}
+ "failures": {
+  "california-music": 1
+ },
+ "errors": {
+  "california-music": "2026-11-21: <urlopen error [Errno -2] Name or service not known>"
+ }
 }
