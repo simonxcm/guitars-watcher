@@ -429,8 +429,8 @@
  },
  "last_check": "2026-11-22",
  "failures": {
-  "california-music": 3,
-  "italie-musique": 1
+  "california-music": 4,
+  "italie-musique": 2
  },
  "errors": {
   "california-music": "2026-11-22: <urlopen error [Errno -2] Name or service not known>",
