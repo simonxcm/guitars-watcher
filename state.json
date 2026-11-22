@@ -427,11 +427,13 @@
    "gibson-j-55-natural-de-1976": "Gibson J-55 Natural de 1976"
   }
  },
- "last_check": "2026-11-21",
+ "last_check": "2026-11-22",
  "failures": {
-  "california-music": 2
+  "california-music": 3,
+  "italie-musique": 1
  },
  "errors": {
-  "california-music": "2026-11-21: <urlopen error [Errno -2] Name or service not known>"
+  "california-music": "2026-11-22: <urlopen error [Errno -2] Name or service not known>",
+  "italie-musique": "2026-11-22: HTTP Error 429: Too Many Requests"
  }
 }
