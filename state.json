@@ -377,7 +377,8 @@
    "10463": "Occasion Jackson Fusion Pro – Metallic Blue – (Japan, 1996) N°701162",
    "10462": "Occasion Gibson ES-335 Studio – (USA) + Flight N°13394722",
    "12937": "Occasion Fender American Stratocaster Ultra Ultraburst 2022 N°US22058921 + case",
-   "12931": "Occasion Seagull Artist Studio 2008 Electronique B Band A2.2 Epicéa Palissandre N°02181000075 + case Trick"
+   "12931": "Occasion Seagull Artist Studio 2008 Electronique B Band A2.2 Epicéa Palissandre N°02181000075 + case Trick",
+   "14471": "Occasion Martin D-10E Sapele N°2969276 + Bag"
   },
   "guitare-collection": {
    "bourgeois-om-style-42-natural-de-2022": "Bourgeois OM Style 42 Natural de 2022",
@@ -429,9 +430,11 @@
  },
  "last_check": "2026-11-23",
  "failures": {
-  "california-music": 14
+  "california-music": 15,
+  "italie-musique": 1
  },
  "errors": {
-  "california-music": "2026-11-23: <urlopen error [Errno -2] Name or service not known>"
+  "california-music": "2026-11-23: <urlopen error [Errno -2] Name or service not known>",
+  "italie-musique": "2026-11-23: HTTP Error 429: Too Many Requests"
  }
 }
