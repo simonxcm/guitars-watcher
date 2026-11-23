@@ -429,12 +429,6 @@
   }
  },
  "last_check": "2026-11-23",
- "failures": {
-  "california-music": 15,
-  "italie-musique": 1
- },
- "errors": {
-  "california-music": "2026-11-23: <urlopen error [Errno -2] Name or service not known>",
-  "italie-musique": "2026-11-23: HTTP Error 429: Too Many Requests"
- }
+ "failures": {},
+ "errors": {}
 }
