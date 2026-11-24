@@ -366,7 +366,9 @@
    "fender-telecaster-1972": "Fender Telecaster 1972",
    "fender-stratocaster-1966": "Fender Stratocaster 1966",
    "fender-champ-amp-5c1-1954": "Fender Champ Amp 5C1 1954",
-   "gretsch-6122-county-gentlemen-1964": "Gretsch 6122 County Gentlemen 1964"
+   "gretsch-6122-county-gentlemen-1964": "Gretsch 6122 County Gentlemen 1964",
+   "gibson-les-paul-standard-2002": "Gibson LP Standard + 2002",
+   "fender-musicmaster-1978": "Fender Musicmaster 1978"
   },
   "guitar-street": {
    "10976": "Occasion Collings D2H 2014 N°23824",
@@ -429,6 +431,10 @@
   }
  },
  "last_check": "2026-11-24",
- "failures": {},
- "errors": {}
+ "failures": {
+  "italie-musique": 1
+ },
+ "errors": {
+  "italie-musique": "2026-11-24: HTTP Error 429: Too Many Requests"
+ }
 }
